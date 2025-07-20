@@ -1,8 +1,8 @@
 const MyStats = () => {
   const stats = [
-    { emoji: '💬', value: 23, label: 'Journals' },
-    { emoji: '💕', value: 147, label: 'Glows' },
-    { emoji: '🧠', value: 45, label: 'Tips Read' }
+    { emoji: '🔥', value: 6, label: 'Glow Streak', color: 'text-orange-500' },
+    { emoji: '💜', value: 4, label: 'Growth Rings', color: 'text-purple-500' },
+    { emoji: '✨', value: 23, label: 'Check-ins', color: 'text-yellow-500' }
   ];
 
   return (

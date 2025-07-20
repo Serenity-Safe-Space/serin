@@ -5,7 +5,8 @@ import BottomNav from '@/components/BottomNav';
 import AvatarGlowSection from '@/components/profile/AvatarGlowSection';
 import WellnessScorePreview from '@/components/profile/WellnessScorePreview';
 import DailyGlowbox from '@/components/profile/DailyGlowbox';
-import GlowQuests from '@/components/profile/GlowQuests';
+import GentleBadges from '@/components/profile/GentleBadges';
+import GlowReport from '@/components/profile/GlowReport';
 import MyStats from '@/components/profile/MyStats';
 import AnonymousLeaderboard from '@/components/profile/AnonymousLeaderboard';
 
@@ -36,13 +37,16 @@ const Profile = () => {
         {/* Daily Glowbox */}
         <DailyGlowbox />
 
-        {/* Glow Quests */}
-        <GlowQuests />
+        {/* Weekly Glow Report */}
+        <GlowReport />
+
+        {/* Gentle Badges */}
+        <GentleBadges />
 
         {/* My Stats */}
         <MyStats />
 
-        {/* Anonymous Leaderboard */}
+        {/* Community Support */}
         <AnonymousLeaderboard />
 
         {/* Quick Actions */}

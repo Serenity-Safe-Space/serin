@@ -14,28 +14,28 @@ const SerinMiniChat = () => {
 
   const messages = {
     chill: [
-      "Hey you 🫶 Have you drunk water today?",
-      "Mood check: 🌧 or ☀️? Wanna talk about it?",
-      "You've been glowing lately ✨ Proud of you",
-      "Need a vibe boost? I'm always here",
-      "Want a tip to help chill out right now?",
-      "You're safe here. Like, seriously 🧸"
+      "Feeling off today? Want to journal or breathe with me?",
+      "You've done 3 days in a row! Want to keep the streak going?",
+      "Your aura is stronger today — you've been showing up for yourself 💜",
+      "Need a gentle check-in? I'm here for you 🧸",
+      "No worries if you missed yesterday. Today's a new start 🌱",
+      "Want a tip to help you feel centered right now?"
     ],
     funny: [
-      "Bestie, drink some water before I make you 💀",
-      "Your phone battery: 📱💀 Your wellness: 📈✨",
-      "Manifesting good vibes for you rn 🔮",
-      "Plot twist: you're the main character today",
-      "Mental health check: are we thriving or just surviving? 👀",
-      "Sending virtual hugs because I can't give real ones yet 🤖💕"
+      "Plot twist: your emotional growth is literally glowing! ✨",
+      "Your consistency is powerful energy today 💫",
+      "Mental health check: your aura is looking magnificent 🌌",
+      "Friendly reminder that you're showing up beautifully 💜",
+      "Today's goal: just 3 minutes of calm breathing - you got this! 🌈",
+      "You focused more on connection this week – we love that for you 🫶"
     ],
     deep: [
-      "Your feelings are valid, even the messy ones 🌊",
-      "Growth isn't linear, and that's perfectly okay",
-      "What would you tell your younger self right now?",
-      "You're exactly where you need to be in this moment",
-      "Healing happens in waves, not straight lines",
-      "Your presence here matters more than you know 💙"
+      "You've checked in 4x this week. Your consistency is powerful 💫",
+      "It's okay. You're still showing up in your own way 🌱",
+      "Every small step counts, and you're taking yours beautifully ✨",
+      "Your emotional balance is growing stronger each day 🧸",
+      "You're part of a community that's growing together 💜",
+      "What would help you feel most supported right now?"
     ]
   };
 
