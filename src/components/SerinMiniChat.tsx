@@ -91,10 +91,10 @@ const SerinMiniChat = () => {
   };
 
   return (
-    <div className="fixed top-6 right-6 z-50 flex flex-col items-end space-y-2">
+    <div className="fixed top-6 right-6 z-50">
       {/* Speech Bubble */}
       {showBubble && (
-        <div className="relative animate-fade-in">
+        <div className="relative animate-fade-in mb-2">
           <div className="bg-card/95 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-glow max-w-xs">
             <p className="text-sm text-foreground leading-relaxed">
               {messages[tone][currentMessage]}

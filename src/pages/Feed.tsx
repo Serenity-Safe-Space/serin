@@ -198,10 +198,6 @@ const Feed = () => {
         ))}
       </main>
 
-      {/* Floating Action Button */}
-      <Button className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-gradient-primary shadow-glow hover:shadow-wellness transition-all duration-300 z-20">
-        <span className="text-2xl">✨</span>
-      </Button>
 
       
       <BottomNav />
