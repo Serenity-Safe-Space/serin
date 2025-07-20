@@ -46,19 +46,20 @@ const Chat = () => {
       if (charIndex < currentMessage.content.length) {
         setDisplayedText(currentMessage.content.slice(0, charIndex + 1));
         charIndex++;
-        setTimeout(typeMessage, 30); // Typing speed
+        setTimeout(typeMessage, 25); // Slightly faster typing for Apple feel
       } else {
         setIsTyping(false);
         // If it's a bot message, wait a moment then allow user input
         if (currentMessage.sender === 'bot') {
           setTimeout(() => {
             setIsUserTurn(true);
-          }, 1000);
+          }, 800);
         }
       }
     };
 
-    setTimeout(typeMessage, 500); // Delay before starting to type
+    // Add a pop animation delay before starting to type
+    setTimeout(typeMessage, 300);
   }, [currentMessage]);
 
   const scrollToBottom = () => {
@@ -200,45 +201,54 @@ const Chat = () => {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto p-4 flex items-center justify-center min-h-[calc(100vh-200px)]">
+      <main className="max-w-lg mx-auto p-6 flex items-center justify-center min-h-[calc(100vh-180px)]">
         {currentMessage && (
-          <div className="w-full animate-fade-in">
-            <div className={`flex ${currentMessage.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] ${currentMessage.sender === 'user' ? 'order-2' : 'order-1'}`}>
-                {currentMessage.sender === 'bot' && getMessageBadge(currentMessage.type)}
-                
-                <Card className={`
-                  ${currentMessage.sender === 'user' 
-                    ? 'bg-gradient-primary text-white shadow-glow' 
-                    : 'bg-card shadow-soft border-2 border-primary/20'
-                  }
-                  transition-all duration-300
-                `}>
-                  <CardContent className="p-6">
-                    <p className="text-base leading-relaxed">
-                      {displayedText}
-                      {isTyping && (
-                        <span className="inline-block w-2 h-5 bg-current ml-1 animate-pulse">|</span>
-                      )}
-                    </p>
-                    <p className={`text-xs mt-3 ${
-                      currentMessage.sender === 'user' 
-                        ? 'text-white/70' 
-                        : 'text-muted-foreground'
-                    }`}>
-                      {currentMessage.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </CardContent>
-                </Card>
+          <div className="w-full max-w-sm mx-auto animate-scale-in">
+            {/* Message Badge */}
+            {currentMessage.sender === 'bot' && (
+              <div className="flex justify-center mb-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                {getMessageBadge(currentMessage.type)}
               </div>
-              
-              {currentMessage.sender === 'bot' && (
-                <Avatar className="h-12 w-12 mr-3 order-1 ring-2 ring-wellness ring-offset-2">
-                  <AvatarFallback className="bg-gradient-wellness text-white text-sm font-bold">
+            )}
+            
+            {/* Avatar for bot messages */}
+            {currentMessage.sender === 'bot' && (
+              <div className="flex justify-center mb-4 animate-bounce-in" style={{ animationDelay: '0.2s' }}>
+                <Avatar className="h-16 w-16 ring-4 ring-wellness/20 ring-offset-4">
+                  <AvatarFallback className="bg-gradient-wellness text-white text-xl font-bold">
                     S
                   </AvatarFallback>
                 </Avatar>
-              )}
+              </div>
+            )}
+            
+            {/* Main Message Card */}
+            <div className="flex justify-center animate-bounce-in" style={{ animationDelay: '0.3s' }}>
+              <Card className={`
+                w-full max-w-md
+                ${currentMessage.sender === 'user' 
+                  ? 'bg-gradient-primary text-white shadow-glow scale-105' 
+                  : 'bg-card/90 backdrop-blur-sm shadow-soft border-2 border-primary/10'
+                }
+                transition-all duration-500 ease-out
+                hover:scale-[1.02] hover:shadow-wellness
+              `}>
+                <CardContent className="p-8 text-center">
+                  <p className="text-lg leading-relaxed font-medium">
+                    {displayedText}
+                    {isTyping && (
+                      <span className="inline-block w-0.5 h-6 bg-current ml-1 animate-pulse">|</span>
+                    )}
+                  </p>
+                  <p className={`text-sm mt-4 ${
+                    currentMessage.sender === 'user' 
+                      ? 'text-white/60' 
+                      : 'text-muted-foreground'
+                  }`}>
+                    {currentMessage.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </CardContent>
+              </Card>
             </div>
             
             <div ref={messagesEndRef} />
