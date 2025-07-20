@@ -1,5 +1,7 @@
 import { Progress } from '@/components/ui/progress';
 
+// Updated wellness preview component
+
 const WellnessScorePreview = () => {
   const wellnessAreas = [
     { emoji: '😌', label: 'Mood', strength: 'growing', message: 'Feeling more balanced' },
