@@ -6,56 +6,57 @@
 
 @layer base {
   :root {
-    /* Core wellness color palette */
-    --background: 220 20% 98%;
-    --foreground: 220 15% 15%;
+    /* Cozy color palette - purple, orange, soft pinks, white */
+    --background: 330 40% 98%;
+    --foreground: 340 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 15%;
+    --card-foreground: 340 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 15%;
+    --popover-foreground: 340 15% 15%;
 
-    /* Primary - Calming Blue */
-    --primary: 210 70% 55%;
+    /* Primary - Soft Purple */
+    --primary: 280 65% 65%;
     --primary-foreground: 0 0% 98%;
-    --primary-glow: 210 80% 70%;
+    --primary-glow: 280 70% 80%;
 
-    /* Secondary - Soft Purple */
-    --secondary: 260 35% 85%;
-    --secondary-foreground: 260 15% 25%;
+    /* Secondary - Warm Orange */
+    --secondary: 25 90% 70%;
+    --secondary-foreground: 25 30% 15%;
 
-    /* Wellness Green */
-    --wellness: 150 65% 50%;
+    /* Wellness - Soft Pink */
+    --wellness: 320 50% 75%;
     --wellness-foreground: 0 0% 98%;
-    --wellness-glow: 150 70% 65%;
+    --wellness-glow: 320 55% 85%;
 
-    /* Warm Accent */
-    --accent: 35 85% 60%;
-    --accent-foreground: 35 25% 15%;
-    --accent-glow: 35 90% 75%;
+    /* Accent - Bright Orange */
+    --accent: 15 85% 65%;
+    --accent-foreground: 15 25% 15%;
+    --accent-glow: 15 90% 80%;
 
     /* Muted tones */
-    --muted: 220 15% 95%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 330 20% 95%;
+    --muted-foreground: 330 10% 45%;
 
     --destructive: 0 75% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 90%;
-    --ring: 210 70% 55%;
+    --border: 330 15% 90%;
+    --input: 330 15% 90%;
+    --ring: 280 65% 65%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(210 70% 55%), hsl(260 60% 65%));
-    --gradient-wellness: linear-gradient(135deg, hsl(150 65% 50%), hsl(180 60% 55%));
-    --gradient-warm: linear-gradient(135deg, hsl(35 85% 60%), hsl(15 80% 65%));
-    --gradient-bg: linear-gradient(180deg, hsl(220 25% 98%), hsl(220 20% 96%));
+    /* Cozy gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(280 65% 65%), hsl(320 55% 75%));
+    --gradient-wellness: linear-gradient(135deg, hsl(320 50% 75%), hsl(340 45% 80%));
+    --gradient-warm: linear-gradient(135deg, hsl(25 90% 70%), hsl(15 85% 65%));
+    --gradient-bg: linear-gradient(180deg, hsl(330 40% 98%), hsl(320 35% 96%));
+    --gradient-hashtag: linear-gradient(135deg, hsl(280 70% 85%), hsl(290 60% 90%));
 
-    /* Shadows */
-    --shadow-soft: 0 4px 20px -8px hsl(220 15% 15% / 0.1);
-    --shadow-glow: 0 8px 32px -8px hsl(210 70% 55% / 0.2);
-    --shadow-wellness: 0 8px 32px -8px hsl(150 65% 50% / 0.2);
+    /* Soft shadows */
+    --shadow-soft: 0 8px 32px -12px hsl(280 40% 70% / 0.15);
+    --shadow-glow: 0 12px 40px -8px hsl(280 65% 65% / 0.25);
+    --shadow-wellness: 0 12px 40px -8px hsl(320 50% 75% / 0.25);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

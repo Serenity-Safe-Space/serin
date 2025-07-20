@@ -26,12 +26,12 @@ const Feed = () => {
       id: '1',
       author: 'Serin AI',
       avatar: 'SA',
-      content: "💫 Daily wellness tip: Take 5 deep breaths right now. Notice how your body feels more relaxed? That's the power of mindful breathing! Your nervous system just shifted into a calmer state.",
+      content: "🧘‍♀️ Pause. Breathe in 5x. I got you. ✨ Your nervous system is chillin' now.",
       type: 'bot',
       likes: 127,
       comments: 23,
       timestamp: '2h ago',
-      tags: ['mindfulness', 'breathing', 'wellness']
+      tags: ['mindfulness', 'breathing', 'wellness', 'selfcare', 'peace']
     },
     {
       id: '2',
@@ -42,18 +42,18 @@ const Feed = () => {
       likes: 89,
       comments: 31,
       timestamp: '4h ago',
-      tags: ['support', 'anxiety', 'victory']
+      tags: ['support', 'anxiety', 'victory', 'community', 'grateful']
     },
     {
       id: '3',
       author: 'Serin AI',
       avatar: 'SA',
-      content: "🧠 Did you know? Your brain forms new neural pathways every time you practice a positive habit. That meditation session, gratitude journal, or kind act? You're literally rewiring your brain for happiness!",
+      content: "🌞 Gratitude check! Drop 1 thing that made you smile today ⬇️",
       type: 'tip',
       likes: 156,
       comments: 18,
       timestamp: '6h ago',
-      tags: ['neuroscience', 'habits', 'positivity']
+      tags: ['gratitude', 'positivity', 'joy', 'mindful']
     },
     {
       id: '4',
@@ -64,13 +64,19 @@ const Feed = () => {
       likes: 67,
       comments: 12,
       timestamp: '8h ago',
-      tags: ['insomnia', 'support-group', 'community']
+      tags: ['insomnia', 'support-group', 'community', 'nightowls']
     }
   ]);
+
+  const [expandedTags, setExpandedTags] = useState<Record<string, boolean>>({});
 
   const handleLike = (postId: string) => {
     // Handle like functionality
     console.log('Liked post:', postId);
+  };
+
+  const toggleTags = (postId: string) => {
+    setExpandedTags(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 
   const getPostIcon = (type: Post['type']) => {
@@ -96,9 +102,9 @@ const Feed = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-bg pb-20">
+    <div className="min-h-screen bg-gradient-bg pb-28">
       <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">
-        <div className="max-w-lg mx-auto p-4">
+        <div className="max-w-lg mx-auto px-6 py-5">
           <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             Wellness Feed
           </h1>
@@ -108,14 +114,14 @@ const Feed = () => {
 
       <SerinHelper page="feed" />
 
-      <main className="max-w-lg mx-auto p-4 space-y-4">
+      <main className="max-w-lg mx-auto px-6 py-6 space-y-6">
         {posts.map((post) => (
-          <Card key={post.id} className="shadow-soft animate-fade-in hover:shadow-glow transition-all duration-300">
-            <CardHeader className="pb-3">
+          <Card key={post.id} className="shadow-soft animate-fade-in hover:shadow-glow transition-all duration-300 rounded-3xl">
+            <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-4">
                   <div className="relative">
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-12 w-12">
                       <AvatarFallback className={`text-white ${getPostBg(post.type)}`}>
                         {post.avatar}
                       </AvatarFallback>
@@ -125,52 +131,65 @@ const Feed = () => {
                     </div>
                   </div>
                   <div>
-                    <p className="font-medium text-sm">{post.author}</p>
+                    <p className="font-semibold text-sm">{post.author}</p>
                     <p className="text-xs text-muted-foreground">{post.timestamp}</p>
                   </div>
                 </div>
               </div>
             </CardHeader>
             
-            <CardContent className="space-y-4">
-              <p className="text-sm leading-relaxed">{post.content}</p>
+            <CardContent className="space-y-5">
+              <p className="text-base leading-relaxed">{post.content}</p>
               
               {post.tags && (
                 <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
+                  {(expandedTags[post.id] ? post.tags : post.tags.slice(0, 2)).map((tag) => (
+                    <Badge 
+                      key={tag} 
+                      className="text-xs bg-gradient-hashtag text-primary-foreground border-0 rounded-full px-3 py-1 font-medium"
+                    >
                       #{tag}
                     </Badge>
                   ))}
+                  {post.tags.length > 2 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleTags(post.id)}
+                      className="text-xs text-muted-foreground hover:text-primary h-6 px-2 rounded-full"
+                    >
+                      {expandedTags[post.id] ? 'Less' : `+${post.tags.length - 2} Tags`}
+                    </Button>
+                  )}
                 </div>
               )}
               
-              <div className="flex items-center justify-between pt-2 border-t">
-                <div className="flex items-center space-x-4">
+              <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                <div className="flex items-center space-x-6">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleLike(post.id)}
-                    className="flex items-center space-x-1 text-muted-foreground hover:text-primary"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary rounded-full px-3 py-2"
                   >
                     <Heart className="h-4 w-4" />
-                    <span className="text-xs">{post.likes}</span>
+                    <span className="text-xs font-medium">{post.likes}</span>
                   </Button>
                   
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="flex items-center space-x-1 text-muted-foreground hover:text-primary"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary rounded-full px-3 py-2"
                   >
                     <MessageCircle className="h-4 w-4" />
-                    <span className="text-xs">{post.comments}</span>
+                    <span className="text-xs font-medium">{post.comments}</span>
                   </Button>
                 </div>
                 
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-primary"
+                  className="text-muted-foreground hover:text-primary rounded-full p-2"
                 >
                   <Share2 className="h-4 w-4" />
                 </Button>
@@ -179,6 +198,11 @@ const Feed = () => {
           </Card>
         ))}
       </main>
+
+      {/* Floating Action Button */}
+      <Button className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-gradient-primary shadow-glow hover:shadow-wellness transition-all duration-300 z-20">
+        <span className="text-2xl">✨</span>
+      </Button>
 
       <ChatbotFloat />
       <BottomNav />
