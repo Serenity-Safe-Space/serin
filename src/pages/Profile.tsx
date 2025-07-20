@@ -32,27 +32,6 @@ const Profile = () => {
         {/* Avatar & Glow Level */}
         <AvatarGlowSection />
 
-        {/* Wellness Score Preview */}
-        <WellnessScorePreview />
-
-        {/* Daily Glowbox */}
-        <DailyGlowbox />
-
-        {/* Weekly Glow Report */}
-        <GlowReport />
-
-        {/* Gentle Badges */}
-        <GentleBadges />
-
-        {/* Community Impact */}
-        <CommunityBadges />
-
-        {/* My Stats */}
-        <MyStats />
-
-        {/* Community Support */}
-        <AnonymousLeaderboard />
-
         {/* Quick Actions */}
         <div className="space-y-3 pt-4">
           <Button variant="outline" className="w-full justify-start h-12 rounded-3xl">
