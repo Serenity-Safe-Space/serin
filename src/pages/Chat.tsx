@@ -159,21 +159,7 @@ const Chat = () => {
     <div className="min-h-screen bg-gradient-bg pb-20">
       <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">
         <div className="max-w-lg mx-auto p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-gradient-primary text-white font-bold">
-                  S
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  Serin AI
-                </h1>
-                <p className="text-sm text-wellness">Live conversation</p>
-              </div>
-            </div>
-            
+          <div className="flex items-center justify-end">
             <div className="flex items-center space-x-2 text-xs text-muted-foreground">
               <span>{currentMessageIndex + 1} / {allMessages.length}</span>
               <div className="flex space-x-1">
