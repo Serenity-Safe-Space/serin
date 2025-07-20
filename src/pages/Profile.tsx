@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Settings, User, HelpCircle } from 'lucide-react';
-import ChatbotFloat from '@/components/ChatbotFloat';
 import BottomNav from '@/components/BottomNav';
 import AvatarGlowSection from '@/components/profile/AvatarGlowSection';
 import WeeklyLeaderboard from '@/components/profile/WeeklyLeaderboard';
@@ -51,7 +50,6 @@ const Profile = () => {
         <span className="text-2xl">👤</span>
       </Button>
 
-      <ChatbotFloat />
       <BottomNav />
     </div>
   );

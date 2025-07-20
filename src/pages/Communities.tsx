@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Users, Clock, Search, Plus } from 'lucide-react';
-import ChatbotFloat from '@/components/ChatbotFloat';
+
 import SerinHelper from '@/components/SerinHelper';
 import BottomNav from '@/components/BottomNav';
 import StoryWithReactions from '@/components/community/StoryWithReactions';
@@ -173,7 +173,6 @@ const Communities = () => {
         <span className="text-2xl">🤝</span>
       </Button>
 
-      <ChatbotFloat />
       <BottomNav />
     </div>
   );
