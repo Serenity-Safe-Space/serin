@@ -95,38 +95,38 @@ const Profile = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-bg pb-20">
+    <div className="min-h-screen bg-gradient-bg pb-28">
       <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">
-        <div className="max-w-lg mx-auto p-4">
+        <div className="max-w-lg mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Profile
             </h1>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="rounded-2xl">
               <Settings className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto p-4 space-y-6">
+      <main className="max-w-lg mx-auto px-6 py-6 space-y-6">
         {/* User Info Card */}
-        <Card className="shadow-soft animate-fade-in">
-          <CardContent className="p-6 text-center">
-            <Avatar className="h-20 w-20 mx-auto mb-4">
-              <AvatarFallback className="bg-gradient-primary text-white text-2xl font-bold">
+        <Card className="shadow-soft animate-fade-in rounded-3xl">
+          <CardContent className="p-8 text-center">
+            <Avatar className="h-24 w-24 mx-auto mb-6">
+              <AvatarFallback className="bg-gradient-primary text-white text-3xl font-bold">
                 AB
               </AvatarFallback>
             </Avatar>
-            <h2 className="text-xl font-bold mb-1">Anonymous Butterfly</h2>
-            <p className="text-muted-foreground text-sm mb-4">Wellness Journey Since March 2024</p>
+            <h2 className="text-xl font-bold mb-2">Anonymous Butterfly</h2>
+            <p className="text-muted-foreground text-sm mb-6">Wellness Journey Since March 2024</p>
             
-            <div className="bg-gradient-primary p-4 rounded-lg text-white">
-              <div className="flex items-center justify-center space-x-2 mb-2">
-                <Star className="h-5 w-5" />
-                <span className="text-lg font-bold">Level {userLevel}</span>
+            <div className="bg-gradient-primary p-6 rounded-2xl text-white">
+              <div className="flex items-center justify-center space-x-3 mb-3">
+                <Star className="h-6 w-6" />
+                <span className="text-xl font-bold">Level {userLevel}</span>
               </div>
-              <Progress value={(userXP / nextLevelXP) * 100} className="mb-2" />
+              <Progress value={(userXP / nextLevelXP) * 100} className="mb-3" />
               <p className="text-sm opacity-90">
                 {userXP} / {nextLevelXP} XP to Level {userLevel + 1}
               </p>
@@ -135,19 +135,19 @@ const Profile = () => {
         </Card>
 
         {/* Wellness Metrics */}
-        <Card className="shadow-soft animate-fade-in">
+        <Card className="shadow-soft animate-fade-in rounded-3xl">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5 text-wellness" />
+            <CardTitle className="flex items-center space-x-3">
+              <TrendingUp className="h-6 w-6 text-wellness" />
               <span>Wellness Evolution</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             {wellnessMetrics.map((metric, index) => (
-              <div key={index} className="space-y-2">
+              <div key={index} className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium">{metric.label}</span>
-                  <span className="text-muted-foreground">{metric.value}%</span>
+                  <span className="text-muted-foreground font-medium">{metric.value}%</span>
                 </div>
                 <Progress value={metric.value} className="h-2" />
               </div>
@@ -157,66 +157,66 @@ const Profile = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="shadow-soft animate-fade-in text-center">
-            <CardContent className="p-4">
-              <MessageSquare className="h-6 w-6 text-primary mx-auto mb-2" />
-              <p className="text-2xl font-bold text-primary">{stats.postsCreated}</p>
-              <p className="text-xs text-muted-foreground">Posts Created</p>
+          <Card className="shadow-soft animate-fade-in text-center rounded-3xl">
+            <CardContent className="p-6">
+              <MessageSquare className="h-8 w-8 text-primary mx-auto mb-3" />
+              <p className="text-2xl font-bold text-primary mb-1">{stats.postsCreated}</p>
+              <p className="text-xs text-muted-foreground font-medium">Posts Created</p>
             </CardContent>
           </Card>
           
-          <Card className="shadow-soft animate-fade-in text-center">
-            <CardContent className="p-4">
-              <Users className="h-6 w-6 text-wellness mx-auto mb-2" />
-              <p className="text-2xl font-bold text-wellness">{stats.communitiesJoined}</p>
-              <p className="text-xs text-muted-foreground">Communities</p>
+          <Card className="shadow-soft animate-fade-in text-center rounded-3xl">
+            <CardContent className="p-6">
+              <Users className="h-8 w-8 text-wellness mx-auto mb-3" />
+              <p className="text-2xl font-bold text-wellness mb-1">{stats.communitiesJoined}</p>
+              <p className="text-xs text-muted-foreground font-medium">Communities</p>
             </CardContent>
           </Card>
           
-          <Card className="shadow-soft animate-fade-in text-center">
-            <CardContent className="p-4">
-              <Heart className="h-6 w-6 text-accent mx-auto mb-2" />
-              <p className="text-2xl font-bold text-accent">{stats.helpfulInteractions}</p>
-              <p className="text-xs text-muted-foreground">Helpful Actions</p>
+          <Card className="shadow-soft animate-fade-in text-center rounded-3xl">
+            <CardContent className="p-6">
+              <Heart className="h-8 w-8 text-accent mx-auto mb-3" />
+              <p className="text-2xl font-bold text-accent mb-1">{stats.helpfulInteractions}</p>
+              <p className="text-xs text-muted-foreground font-medium">Helpful Actions</p>
             </CardContent>
           </Card>
           
-          <Card className="shadow-soft animate-fade-in text-center">
-            <CardContent className="p-4">
-              <Calendar className="h-6 w-6 text-primary mx-auto mb-2" />
-              <p className="text-2xl font-bold text-primary">{stats.daysActive}</p>
-              <p className="text-xs text-muted-foreground">Days Active</p>
+          <Card className="shadow-soft animate-fade-in text-center rounded-3xl">
+            <CardContent className="p-6">
+              <Calendar className="h-8 w-8 text-primary mx-auto mb-3" />
+              <p className="text-2xl font-bold text-primary mb-1">{stats.daysActive}</p>
+              <p className="text-xs text-muted-foreground font-medium">Days Active</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Achievements */}
-        <Card className="shadow-soft animate-fade-in">
+        <Card className="shadow-soft animate-fade-in rounded-3xl">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Award className="h-5 w-5 text-accent" />
+            <CardTitle className="flex items-center space-x-3">
+              <Award className="h-6 w-6 text-accent" />
               <span>Achievements</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {achievements.map((achievement) => (
               <div
                 key={achievement.id}
-                className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${
+                className={`flex items-center space-x-4 p-4 rounded-2xl transition-all duration-200 ${
                   achievement.earned
                     ? 'bg-gradient-wellness/10 border border-wellness/20'
                     : 'bg-muted/50'
                 }`}
               >
-                <div className="text-2xl">{achievement.icon}</div>
+                <div className="text-3xl">{achievement.icon}</div>
                 <div className="flex-1">
                   <p className={`font-medium ${achievement.earned ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {achievement.title}
                   </p>
-                  <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                  <p className="text-sm text-muted-foreground">{achievement.description}</p>
                   {!achievement.earned && achievement.progress && (
-                    <div className="mt-1">
-                      <Progress value={achievement.progress} className="h-1" />
+                    <div className="mt-2">
+                      <Progress value={achievement.progress} className="h-2" />
                       <p className="text-xs text-muted-foreground mt-1">
                         {achievement.progress}% complete
                       </p>
@@ -224,7 +224,7 @@ const Profile = () => {
                   )}
                 </div>
                 {achievement.earned && (
-                  <Badge className="bg-gradient-wellness text-white">
+                  <Badge className="bg-gradient-wellness text-white rounded-full px-3 py-1">
                     Earned
                   </Badge>
                 )}
@@ -234,23 +234,28 @@ const Profile = () => {
         </Card>
 
         {/* Quick Actions */}
-        <Card className="shadow-soft animate-fade-in">
-          <CardContent className="p-4 space-y-3">
-            <Button variant="outline" className="w-full justify-start">
-              <User className="h-4 w-4 mr-2" />
+        <Card className="shadow-soft animate-fade-in rounded-3xl">
+          <CardContent className="p-6 space-y-3">
+            <Button variant="outline" className="w-full justify-start h-12 rounded-2xl">
+              <User className="h-5 w-5 mr-3" />
               Edit Profile
             </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <Settings className="h-4 w-4 mr-2" />
+            <Button variant="outline" className="w-full justify-start h-12 rounded-2xl">
+              <Settings className="h-5 w-5 mr-3" />
               App Settings
             </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <HelpCircle className="h-4 w-4 mr-2" />
+            <Button variant="outline" className="w-full justify-start h-12 rounded-2xl">
+              <HelpCircle className="h-5 w-5 mr-3" />
               Help & Support
             </Button>
           </CardContent>
         </Card>
       </main>
+
+      {/* Floating Action Button */}
+      <Button className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-gradient-primary shadow-glow hover:shadow-wellness transition-all duration-300 z-20">
+        <span className="text-2xl">👤</span>
+      </Button>
 
       <ChatbotFloat />
       <BottomNav />

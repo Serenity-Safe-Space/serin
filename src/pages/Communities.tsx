@@ -114,14 +114,14 @@ const Communities = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-bg pb-20">
+    <div className="min-h-screen bg-gradient-bg pb-28">
       <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">
-        <div className="max-w-lg mx-auto p-4 space-y-4">
+        <div className="max-w-lg mx-auto px-6 py-5 space-y-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Communities
             </h1>
-            <Button size="sm" className="bg-gradient-wellness">
+            <Button size="sm" className="bg-gradient-wellness rounded-full">
               <Plus className="h-4 w-4 mr-1" />
               Create
             </Button>
@@ -133,16 +133,16 @@ const Communities = () => {
               placeholder="Search communities and rooms..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 rounded-2xl"
             />
           </div>
 
-          <div className="flex bg-muted p-1 rounded-lg">
+          <div className="flex bg-muted p-1 rounded-2xl">
             <button
               onClick={() => setActiveTab('communities')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`flex-1 py-3 px-4 rounded-2xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'communities'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-gradient-primary text-primary-foreground shadow-soft'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -150,9 +150,9 @@ const Communities = () => {
             </button>
             <button
               onClick={() => setActiveTab('rooms')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`flex-1 py-3 px-4 rounded-2xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'rooms'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-gradient-primary text-primary-foreground shadow-soft'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -164,52 +164,55 @@ const Communities = () => {
 
       <SerinHelper page="communities" />
 
-      <main className="max-w-lg mx-auto p-4 space-y-4">
+      <main className="max-w-lg mx-auto px-6 py-6 space-y-6">
         {activeTab === 'communities' ? (
           <>
             {communities.map((community) => (
-              <Card key={community.id} className="shadow-soft animate-fade-in hover:shadow-glow transition-all duration-300">
-                <CardHeader className="pb-3">
+              <Card key={community.id} className="shadow-soft animate-fade-in hover:shadow-glow transition-all duration-300 rounded-3xl">
+                <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="text-2xl">{getCommunityIcon(community.type)}</div>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-3xl">{getCommunityIcon(community.type)}</div>
                       <div className="flex-1">
                         <CardTitle className="text-lg flex items-center gap-2">
                           {community.name}
                           {community.isLive && (
-                            <Badge variant="destructive" className="text-xs animate-pulse">
+                            <Badge className="text-xs animate-pulse bg-gradient-warm text-white border-0 rounded-full">
                               LIVE
                             </Badge>
                           )}
                         </CardTitle>
-                        <p className="text-sm text-muted-foreground">{community.description}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{community.description}</p>
                       </div>
                     </div>
                   </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-4">
                   <div className="flex flex-wrap gap-2">
                     {community.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
+                      <Badge 
+                        key={tag} 
+                        className="text-xs bg-gradient-hashtag text-primary-foreground border-0 rounded-full px-3 py-1 font-medium"
+                      >
                         #{tag}
                       </Badge>
                     ))}
                   </div>
                   
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground pt-3 border-t border-border/50">
                     <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-2">
                         <Users className="h-4 w-4" />
-                        <span>{community.members.toLocaleString()}</span>
+                        <span className="font-medium">{community.members.toLocaleString()}</span>
                       </div>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4" />
                         <span>{community.lastActivity}</span>
                       </div>
                     </div>
                     
-                    <Button size="sm" variant="outline" className="hover:bg-primary hover:text-primary-foreground">
+                    <Button size="sm" className="bg-gradient-primary hover:shadow-glow rounded-full px-6">
                       Join
                     </Button>
                   </div>
@@ -220,14 +223,14 @@ const Communities = () => {
         ) : (
           <>
             {rooms.map((room) => (
-              <Card key={room.id} className="shadow-soft animate-fade-in hover:shadow-glow transition-all duration-300 border-l-4 border-l-wellness">
-                <CardHeader className="pb-3">
+              <Card key={room.id} className="shadow-soft animate-fade-in hover:shadow-glow transition-all duration-300 border-l-4 border-l-wellness rounded-3xl">
+                <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg flex items-center gap-2">
+                      <CardTitle className="text-lg flex items-center gap-3">
                         <Zap className="h-5 w-5 text-wellness" />
                         {room.title}
-                        <Badge variant="destructive" className="text-xs animate-pulse">
+                        <Badge className="text-xs animate-pulse bg-gradient-warm text-white border-0 rounded-full">
                           LIVE
                         </Badge>
                       </CardTitle>
@@ -236,15 +239,15 @@ const Communities = () => {
                   </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between pt-3 border-t border-border/50">
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-2">
                         <Users className="h-4 w-4" />
-                        <span>{room.participants} active</span>
+                        <span className="font-medium">{room.participants} active</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Avatar className="h-5 w-5">
+                      <div className="flex items-center space-x-2">
+                        <Avatar className="h-6 w-6">
                           <AvatarFallback className="text-xs bg-gradient-warm text-white">
                             {room.host.charAt(0)}
                           </AvatarFallback>
@@ -253,8 +256,8 @@ const Communities = () => {
                       </div>
                     </div>
                     
-                    <Button size="sm" className="bg-gradient-wellness hover:shadow-wellness">
-                      <MessageSquare className="h-4 w-4 mr-1" />
+                    <Button size="sm" className="bg-gradient-wellness hover:shadow-wellness rounded-full px-4">
+                      <MessageSquare className="h-4 w-4 mr-2" />
                       Join Room
                     </Button>
                   </div>
@@ -264,6 +267,11 @@ const Communities = () => {
           </>
         )}
       </main>
+
+      {/* Floating Action Button */}
+      <Button className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-gradient-wellness shadow-glow hover:shadow-wellness transition-all duration-300 z-20">
+        <span className="text-2xl">🤝</span>
+      </Button>
 
       <ChatbotFloat />
       <BottomNav />

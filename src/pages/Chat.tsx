@@ -157,50 +157,50 @@ const Chat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-bg pb-20">
+    <div className="min-h-screen bg-gradient-bg pb-28">
       <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">
-        <div className="max-w-lg mx-auto p-4">
+        <div className="max-w-lg mx-auto px-6 py-5">
           {/* History buttons row */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowHistory(!showHistory)}
-                className="flex items-center space-x-1 hover:bg-primary/10"
+                className="flex items-center space-x-2 hover:bg-primary/10 rounded-2xl"
               >
                 <History className="h-4 w-4" />
-                <span className="text-xs">History</span>
+                <span className="text-xs font-medium">History</span>
               </Button>
               
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center space-x-1 hover:bg-wellness/10"
+                className="flex items-center space-x-2 hover:bg-wellness/10 rounded-2xl"
               >
                 <Plus className="h-4 w-4" />
-                <span className="text-xs">New Chat</span>
+                <span className="text-xs font-medium">New Chat</span>
               </Button>
               
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex items-center space-x-1 hover:bg-accent/10"
+                className="flex items-center space-x-1 hover:bg-accent/10 rounded-2xl px-3"
               >
                 <Archive className="h-4 w-4" />
               </Button>
             </div>
             
             {/* Navigation controls */}
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-              <span>{currentMessageIndex + 1} / {allMessages.length}</span>
+            <div className="flex items-center space-x-3 text-xs text-muted-foreground">
+              <span className="font-medium">{currentMessageIndex + 1} / {allMessages.length}</span>
               <div className="flex space-x-1">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigateMessages('prev')}
                   disabled={currentMessageIndex === 0}
-                  className="h-6 w-6 p-0"
+                  className="h-8 w-8 p-0 rounded-full"
                 >
                   ←
                 </Button>
@@ -209,7 +209,7 @@ const Chat = () => {
                   size="sm"
                   onClick={() => navigateMessages('next')}
                   disabled={currentMessageIndex === allMessages.length - 1}
-                  className="h-6 w-6 p-0"
+                  className="h-8 w-8 p-0 rounded-full"
                 >
                   →
                 </Button>
@@ -219,15 +219,15 @@ const Chat = () => {
           
           {/* History dropdown */}
           {showHistory && (
-            <div className="mb-3 animate-fade-in">
-              <Card className="shadow-soft border border-primary/20">
-                <CardContent className="p-3 space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Recent Conversations</p>
+            <div className="mb-4 animate-fade-in">
+              <Card className="shadow-soft border border-primary/20 rounded-3xl">
+                <CardContent className="p-5 space-y-3">
+                  <p className="text-sm font-medium text-muted-foreground mb-3">Recent Conversations</p>
                   
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-xs h-8 hover:bg-primary/10"
+                    className="w-full justify-start text-sm h-10 hover:bg-primary/10 rounded-2xl"
                   >
                     💙 Anxiety Support - 2 hours ago
                   </Button>
@@ -235,7 +235,7 @@ const Chat = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-xs h-8 hover:bg-wellness/10"
+                    className="w-full justify-start text-sm h-10 hover:bg-wellness/10 rounded-2xl"
                   >
                     🌟 Morning Check-in - Yesterday
                   </Button>
@@ -243,7 +243,7 @@ const Chat = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-xs h-8 hover:bg-accent/10"
+                    className="w-full justify-start text-sm h-10 hover:bg-accent/10 rounded-2xl"
                   >
                     📚 Mindfulness Tips - 3 days ago
                   </Button>
@@ -251,16 +251,16 @@ const Chat = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-xs h-8 hover:bg-primary/10"
+                    className="w-full justify-start text-sm h-10 hover:bg-primary/10 rounded-2xl"
                   >
                     😊 Gratitude Practice - 1 week ago
                   </Button>
                   
-                  <div className="pt-2 border-t">
+                  <div className="pt-3 border-t">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-center text-xs h-8 text-muted-foreground"
+                      className="w-full justify-center text-sm h-10 text-muted-foreground rounded-2xl"
                     >
                       View All Conversations
                     </Button>
@@ -272,21 +272,21 @@ const Chat = () => {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto p-6 flex items-center justify-center min-h-[calc(100vh-180px)]">
+      <main className="max-w-lg mx-auto px-6 flex items-center justify-center min-h-[calc(100vh-200px)]">
         {currentMessage && (
           <div className="w-full max-w-sm mx-auto animate-scale-in">
             {/* Message Badge */}
             {currentMessage.sender === 'bot' && (
-              <div className="flex justify-center mb-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <div className="flex justify-center mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
                 {getMessageBadge(currentMessage.type)}
               </div>
             )}
             
             {/* Avatar for bot messages */}
             {currentMessage.sender === 'bot' && (
-              <div className="flex justify-center mb-4 animate-bounce-in" style={{ animationDelay: '0.2s' }}>
-                <Avatar className="h-16 w-16 ring-4 ring-wellness/20 ring-offset-4">
-                  <AvatarFallback className="bg-gradient-wellness text-white text-xl font-bold">
+              <div className="flex justify-center mb-6 animate-bounce-in" style={{ animationDelay: '0.2s' }}>
+                <Avatar className="h-20 w-20 ring-4 ring-wellness/20 ring-offset-4">
+                  <AvatarFallback className="bg-gradient-wellness text-white text-2xl font-bold">
                     S
                   </AvatarFallback>
                 </Avatar>
@@ -303,6 +303,7 @@ const Chat = () => {
                 }
                 transition-all duration-500 ease-out
                 hover:scale-[1.02] hover:shadow-wellness
+                rounded-3xl
               `}>
                 <CardContent className="p-8 text-center">
                   <p className="text-lg leading-relaxed font-medium">
@@ -328,27 +329,27 @@ const Chat = () => {
       </main>
 
       {/* Input area - only show when it's user's turn */}
-      <div className={`fixed bottom-16 left-0 right-0 bg-card/80 backdrop-blur-sm border-t p-4 transition-all duration-300 ${
+      <div className={`fixed bottom-20 left-0 right-0 bg-card/90 backdrop-blur-md border-t rounded-t-3xl p-6 transition-all duration-300 ${
         isUserTurn ? 'opacity-100 translate-y-0' : 'opacity-50 pointer-events-none translate-y-2'
       }`}>
         <div className="max-w-lg mx-auto">
           {isUserTurn && (
-            <p className="text-xs text-muted-foreground mb-2 animate-fade-in">
+            <p className="text-sm text-muted-foreground mb-3 animate-fade-in">
               Serin is waiting for your response...
             </p>
           )}
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder={isUserTurn ? "Share your thoughts..." : "Wait for your turn..."}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              className="flex-1"
+              className="flex-1 rounded-2xl"
               disabled={!isUserTurn}
             />
             <Button 
               onClick={sendMessage}
-              className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+              className="bg-gradient-primary hover:shadow-glow transition-all duration-300 rounded-2xl px-6"
               disabled={!newMessage.trim() || !isUserTurn}
             >
               <Send className="h-4 w-4" />
