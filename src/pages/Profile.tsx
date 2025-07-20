@@ -3,13 +3,7 @@ import { Settings, User, HelpCircle } from 'lucide-react';
 import ChatbotFloat from '@/components/ChatbotFloat';
 import BottomNav from '@/components/BottomNav';
 import AvatarGlowSection from '@/components/profile/AvatarGlowSection';
-import WellnessScorePreview from '@/components/profile/WellnessScorePreview';
-import DailyGlowbox from '@/components/profile/DailyGlowbox';
-import GentleBadges from '@/components/profile/GentleBadges';
-import GlowReport from '@/components/profile/GlowReport';
-import CommunityBadges from '@/components/community/CommunityBadges';
-import MyStats from '@/components/profile/MyStats';
-import AnonymousLeaderboard from '@/components/profile/AnonymousLeaderboard';
+import WeeklyLeaderboard from '@/components/profile/WeeklyLeaderboard';
 
 const Profile = () => {
 
@@ -31,6 +25,9 @@ const Profile = () => {
       <main className="max-w-lg mx-auto px-6 py-8 space-y-8">
         {/* Avatar & Glow Level */}
         <AvatarGlowSection />
+
+        {/* Weekly Leaderboard */}
+        <WeeklyLeaderboard />
 
         {/* Quick Actions */}
         <div className="space-y-3 pt-4">
