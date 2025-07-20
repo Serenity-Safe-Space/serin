@@ -8,6 +8,26 @@ const AvatarGlowSection = () => {
   const nextLevelXP = 2500;
   const streak = 6;
 
+  const levelNames = [
+    "Just Vibin' 🌱",
+    "Lowkey Glow 😶‍🌫️", 
+    "Soft Mode 🧸",
+    "Lil Spark ✨",
+    "Inner Peace-ish 😌",
+    "Small Wins 🧃",
+    "Main Character 🎬",
+    "Butterfly Era 🦋",
+    "Too Zen 2 Care 🧘‍♀️",
+    "Glowed Up 💅",
+    "No Cringe Zone 🚫😬",
+    "Real Ones Only 🤝",
+    "Mentally Beach 🌊",
+    "10/10 Recommend ⭐",
+    "Soft Flex 🧚‍♀️"
+  ];
+
+  const currentLevelName = levelNames[userLevel - 1] || "Soft Flex 🧚‍♀️";
+
   return (
     <div className="text-center space-y-6">
       {/* Avatar */}
@@ -25,7 +45,7 @@ const AvatarGlowSection = () => {
       {/* Glow Level */}
       <div className="space-y-3">
         <h2 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          Level {userLevel} – "Blossoming Glow"
+          Level {userLevel} – {currentLevelName}
         </h2>
         
         <div className="max-w-xs mx-auto">
