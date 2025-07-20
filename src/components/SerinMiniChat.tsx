@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 
+// Serin AI Mini Chat Component
+
 const SerinMiniChat = () => {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [showBubble, setShowBubble] = useState(true);
