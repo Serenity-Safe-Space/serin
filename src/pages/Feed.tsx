@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, Share2, BookOpen, TrendingUp, Users } from 'lucide-react';
 import ChatbotFloat from '@/components/ChatbotFloat';
+import SerinHelper from '@/components/SerinHelper';
 import BottomNav from '@/components/BottomNav';
 
 interface Post {
@@ -104,6 +105,8 @@ const Feed = () => {
           <p className="text-sm text-muted-foreground">Discover, share, and grow together</p>
         </div>
       </header>
+
+      <SerinHelper page="feed" />
 
       <main className="max-w-lg mx-auto p-4 space-y-4">
         {posts.map((post) => (

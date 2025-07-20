@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Users, MessageSquare, Clock, Search, Plus, Zap } from 'lucide-react';
 import ChatbotFloat from '@/components/ChatbotFloat';
+import SerinHelper from '@/components/SerinHelper';
 import BottomNav from '@/components/BottomNav';
 
 interface Community {
@@ -160,6 +161,8 @@ const Communities = () => {
           </div>
         </div>
       </header>
+
+      <SerinHelper page="communities" />
 
       <main className="max-w-lg mx-auto p-4 space-y-4">
         {activeTab === 'communities' ? (
