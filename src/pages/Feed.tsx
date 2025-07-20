@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, Share2, BookOpen, TrendingUp, Users } from 'lucide-react';
-import ChatbotFloat from '@/components/ChatbotFloat';
-import SerinHelper from '@/components/SerinHelper';
+import SerinMiniChat from '@/components/SerinMiniChat';
 import BottomNav from '@/components/BottomNav';
 
 interface Post {
@@ -112,7 +111,7 @@ const Feed = () => {
         </div>
       </header>
 
-      <SerinHelper page="feed" />
+      <SerinMiniChat />
 
       <main className="max-w-lg mx-auto px-6 py-6 space-y-6">
         {posts.map((post) => (
@@ -204,7 +203,7 @@ const Feed = () => {
         <span className="text-2xl">✨</span>
       </Button>
 
-      <ChatbotFloat />
+      
       <BottomNav />
     </div>
   );
