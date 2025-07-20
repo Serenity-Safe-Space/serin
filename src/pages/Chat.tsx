@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, Heart, BarChart3, Smile } from 'lucide-react';
+import { Send, Heart, BarChart3, Smile, History, Plus, Archive } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 
 interface Message {
@@ -32,6 +32,7 @@ const Chat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isUserTurn, setIsUserTurn] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Typing effect for displaying messages character by character
@@ -159,7 +160,38 @@ const Chat = () => {
     <div className="min-h-screen bg-gradient-bg pb-20">
       <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">
         <div className="max-w-lg mx-auto p-4">
-          <div className="flex items-center justify-end">
+          {/* History buttons row */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowHistory(!showHistory)}
+                className="flex items-center space-x-1 hover:bg-primary/10"
+              >
+                <History className="h-4 w-4" />
+                <span className="text-xs">History</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-1 hover:bg-wellness/10"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="text-xs">New Chat</span>
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center space-x-1 hover:bg-accent/10"
+              >
+                <Archive className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {/* Navigation controls */}
             <div className="flex items-center space-x-2 text-xs text-muted-foreground">
               <span>{currentMessageIndex + 1} / {allMessages.length}</span>
               <div className="flex space-x-1">
@@ -184,6 +216,59 @@ const Chat = () => {
               </div>
             </div>
           </div>
+          
+          {/* History dropdown */}
+          {showHistory && (
+            <div className="mb-3 animate-fade-in">
+              <Card className="shadow-soft border border-primary/20">
+                <CardContent className="p-3 space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Recent Conversations</p>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs h-8 hover:bg-primary/10"
+                  >
+                    💙 Anxiety Support - 2 hours ago
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs h-8 hover:bg-wellness/10"
+                  >
+                    🌟 Morning Check-in - Yesterday
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs h-8 hover:bg-accent/10"
+                  >
+                    📚 Mindfulness Tips - 3 days ago
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs h-8 hover:bg-primary/10"
+                  >
+                    😊 Gratitude Practice - 1 week ago
+                  </Button>
+                  
+                  <div className="pt-2 border-t">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-center text-xs h-8 text-muted-foreground"
+                    >
+                      View All Conversations
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </header>
 
