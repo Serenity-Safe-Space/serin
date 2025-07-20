@@ -7,6 +7,7 @@ import WellnessScorePreview from '@/components/profile/WellnessScorePreview';
 import DailyGlowbox from '@/components/profile/DailyGlowbox';
 import GentleBadges from '@/components/profile/GentleBadges';
 import GlowReport from '@/components/profile/GlowReport';
+import CommunityBadges from '@/components/community/CommunityBadges';
 import MyStats from '@/components/profile/MyStats';
 import AnonymousLeaderboard from '@/components/profile/AnonymousLeaderboard';
 
@@ -42,6 +43,9 @@ const Profile = () => {
 
         {/* Gentle Badges */}
         <GentleBadges />
+
+        {/* Community Impact */}
+        <CommunityBadges />
 
         {/* My Stats */}
         <MyStats />

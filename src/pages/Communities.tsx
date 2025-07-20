@@ -8,6 +8,7 @@ import { Users, Clock, Search, Plus } from 'lucide-react';
 import ChatbotFloat from '@/components/ChatbotFloat';
 import SerinHelper from '@/components/SerinHelper';
 import BottomNav from '@/components/BottomNav';
+import StoryWithReactions from '@/components/community/StoryWithReactions';
 
 interface Community {
   id: string;
@@ -106,6 +107,13 @@ const Communities = () => {
       <SerinHelper page="communities" />
 
       <main className="max-w-lg mx-auto px-6 py-6 space-y-6">
+        {/* Example Story with Anonymized Reactions */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Recent Community Stories</h2>
+          <StoryWithReactions />
+        </div>
+        
+        {/* Communities List */}
         {communities.map((community) => (
           <Card key={community.id} className="shadow-soft animate-fade-in hover:shadow-glow transition-all duration-300 rounded-3xl">
             <CardHeader className="pb-4">
