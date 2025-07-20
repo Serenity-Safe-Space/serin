@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Users, Clock, Search, Plus } from 'lucide-react';
 
-import SerinHelper from '@/components/SerinHelper';
+
 import BottomNav from '@/components/BottomNav';
 import StoryWithReactions from '@/components/community/StoryWithReactions';
 
@@ -104,7 +104,7 @@ const Communities = () => {
         </div>
       </header>
 
-      <SerinHelper page="communities" />
+      
 
       <main className="max-w-lg mx-auto px-6 py-6 space-y-6">
         {/* Example Story with Anonymized Reactions */}
