@@ -102,12 +102,12 @@ const Feed = () => {
 
   return (
     <div className="min-h-screen bg-gradient-bg pb-28">
-      <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">
-        <div className="max-w-lg mx-auto px-6 py-5">
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+      <header className="bg-white/95 backdrop-blur-md border-b-0 sticky top-0 z-10 shadow-soft">
+        <div className="max-w-lg mx-auto px-6 py-6">
+          <h1 className="text-3xl font-black bg-gradient-primary bg-clip-text text-transparent">
             Wellness Feed
           </h1>
-          <p className="text-sm text-muted-foreground">Discover, share, and grow together</p>
+          <p className="text-sm text-muted-foreground font-medium">Discover, share, and grow together</p>
         </div>
       </header>
 
@@ -115,37 +115,37 @@ const Feed = () => {
 
       <main className="max-w-lg mx-auto px-6 py-6 space-y-6">
         {posts.map((post) => (
-          <Card key={post.id} className="shadow-soft animate-fade-in hover:shadow-glow transition-all duration-300 rounded-3xl">
-            <CardHeader className="pb-4">
+          <Card key={post.id} className="shadow-soft animate-fade-in hover:shadow-elegant transition-all duration-300 rounded-2xl bg-white">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="relative">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback className={`text-white ${getPostBg(post.type)}`}>
+                    <Avatar className="h-14 w-14 shadow-pill">
+                      <AvatarFallback className={`text-white ${getPostBg(post.type)} font-bold text-sm`}>
                         {post.avatar}
                       </AvatarFallback>
                     </Avatar>
-                    <div className={`absolute -top-1 -right-1 p-1 rounded-full ${getPostBg(post.type)}`}>
+                    <div className={`absolute -top-1 -right-1 p-1.5 rounded-full ${getPostBg(post.type)} shadow-pill`}>
                       {getPostIcon(post.type)}
                     </div>
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">{post.author}</p>
-                    <p className="text-xs text-muted-foreground">{post.timestamp}</p>
+                    <p className="font-bold text-sm text-foreground">{post.author}</p>
+                    <p className="text-xs text-muted-foreground font-medium">{post.timestamp}</p>
                   </div>
                 </div>
               </div>
             </CardHeader>
             
             <CardContent className="space-y-5">
-              <p className="text-base leading-relaxed">{post.content}</p>
+              <p className="text-base leading-relaxed font-medium text-foreground">{post.content}</p>
               
               {post.tags && (
                 <div className="flex flex-wrap gap-2">
                   {(expandedTags[post.id] ? post.tags : post.tags.slice(0, 2)).map((tag) => (
                     <Badge 
                       key={tag} 
-                      className="text-xs bg-gradient-hashtag text-primary-foreground border-0 rounded-full px-3 py-1 font-medium"
+                      className="text-xs bg-gradient-hashtag text-white border-0 rounded-pill px-4 py-1.5 font-bold shadow-pill hover:shadow-glow transition-all duration-200"
                     >
                       #{tag}
                     </Badge>
@@ -155,7 +155,7 @@ const Feed = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => toggleTags(post.id)}
-                      className="text-xs text-muted-foreground hover:text-primary h-6 px-2 rounded-full"
+                      className="text-xs text-muted-foreground hover:text-primary h-7 px-3 rounded-pill font-semibold"
                     >
                       {expandedTags[post.id] ? 'Less' : `+${post.tags.length - 2} Tags`}
                     </Button>
@@ -163,32 +163,32 @@ const Feed = () => {
                 </div>
               )}
               
-              <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                <div className="flex items-center space-x-6">
+              <div className="flex items-center justify-between pt-4 border-t border-border/30">
+                <div className="flex items-center space-x-4">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleLike(post.id)}
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary rounded-full px-3 py-2"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary rounded-pill px-4 py-2 hover:bg-primary-light transition-all duration-200"
                   >
                     <Heart className="h-4 w-4" />
-                    <span className="text-xs font-medium">{post.likes}</span>
+                    <span className="text-xs font-bold">{post.likes}</span>
                   </Button>
                   
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary rounded-full px-3 py-2"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary rounded-pill px-4 py-2 hover:bg-primary-light transition-all duration-200"
                   >
                     <MessageCircle className="h-4 w-4" />
-                    <span className="text-xs font-medium">{post.comments}</span>
+                    <span className="text-xs font-bold">{post.comments}</span>
                   </Button>
                 </div>
                 
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-primary rounded-full p-2"
+                  className="text-muted-foreground hover:text-primary rounded-pill p-3 hover:bg-primary-light transition-all duration-200"
                 >
                   <Share2 className="h-4 w-4" />
                 </Button>

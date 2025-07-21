@@ -2,113 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Serin - Mental Wellness Social App Design System */
+/* Modern Minimalist Design System - Gen Z Wellness App */
 
 @layer base {
   :root {
-    /* Cozy color palette - purple, orange, soft pinks, white */
-    --background: 330 40% 98%;
-    --foreground: 340 15% 15%;
+    /* Modern Color Palette - Lavender Primary + Soft Yellow Secondary */
+    --background: 0 0% 100%;          /* Pure white */
+    --foreground: 220 15% 12%;        /* Deep charcoal #1e1e22 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 340 15% 15%;
+    --card: 0 0% 100%;                /* Pure white cards */
+    --card-foreground: 220 15% 12%;   /* Deep charcoal text */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 340 15% 15%;
+    --popover-foreground: 220 15% 12%;
 
-    /* Primary - Soft Purple */
-    --primary: 280 65% 65%;
-    --primary-foreground: 0 0% 98%;
-    --primary-glow: 280 70% 80%;
+    /* Primary - Lavender #EAB7FE */
+    --primary: 280 100% 85%;          /* Lavender */
+    --primary-foreground: 280 40% 20%; /* Deep purple text */
+    --primary-light: 280 80% 92%;     /* Ultra light lavender */
+    --primary-glow: 280 90% 88%;      /* Soft lavender glow */
+    
+    /* Secondary - Soft Yellow */
+    --secondary: 50 95% 75%;          /* Soft yellow #f9e71e */
+    --secondary-foreground: 50 60% 20%; /* Dark yellow text */
+    --secondary-light: 50 90% 88%;    /* Ultra light yellow */
 
-    /* Secondary - Warm Orange */
-    --secondary: 25 90% 70%;
-    --secondary-foreground: 25 30% 15%;
+    /* Wellness - Keep some wellness colors */
+    --wellness: 140 45% 85%;          /* Soft sage for wellness */
+    --wellness-foreground: 140 60% 20%; /* Forest green */
+    --wellness-glow: 140 50% 90%;     /* Light sage glow */
 
-    /* Wellness - Soft Pink */
-    --wellness: 320 50% 75%;
-    --wellness-foreground: 0 0% 98%;
-    --wellness-glow: 320 55% 85%;
+    /* Accent Colors from Palette */
+    --accent-violet: 280 60% 45%;     /* Deep violet #a752a */
+    --accent-orange: 18 100% 58%;     /* Warm orange #ff692a */
+    --accent-pink: 320 80% 92%;       /* Light pink blush #f8d4eb */
 
-    /* Accent - Bright Orange */
-    --accent: 15 85% 65%;
-    --accent-foreground: 15 25% 15%;
-    --accent-glow: 15 90% 80%;
+    /* Modern Neutrals */
+    --muted: 220 15% 96%;             /* Light gray */
+    --muted-foreground: 220 10% 45%;  /* Medium gray */
 
-    /* Muted tones */
-    --muted: 330 20% 95%;
-    --muted-foreground: 330 10% 45%;
+    --destructive: 0 75% 60%;         /* Red */
+    --destructive-foreground: 0 0% 100%; /* White */
 
-    --destructive: 0 75% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --border: 220 15% 90%;            /* Light border */
+    --input: 220 15% 94%;             /* Input background */
+    --ring: 280 100% 85%;             /* Lavender focus ring */
 
-    --border: 330 15% 90%;
-    --input: 330 15% 90%;
-    --ring: 280 65% 65%;
+    /* Modern Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(280 100% 85%), hsl(280 60% 45%));
+    --gradient-secondary: linear-gradient(135deg, hsl(50 95% 75%), hsl(18 100% 58%));
+    --gradient-warm: linear-gradient(135deg, hsl(320 80% 92%), hsl(280 80% 92%));
+    --gradient-wellness: linear-gradient(135deg, hsl(280 80% 92%), hsl(50 90% 88%));
+    --gradient-bg: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 15% 98%));
+    --gradient-hashtag: linear-gradient(135deg, hsl(280 100% 85%), hsl(50 95% 75%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(220 15% 99%));
 
-    /* Cozy gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(280 65% 65%), hsl(320 55% 75%));
-    --gradient-wellness: linear-gradient(135deg, hsl(320 50% 75%), hsl(340 45% 80%));
-    --gradient-warm: linear-gradient(135deg, hsl(25 90% 70%), hsl(15 85% 65%));
-    --gradient-bg: linear-gradient(180deg, hsl(330 40% 98%), hsl(320 35% 96%));
-    --gradient-hashtag: linear-gradient(135deg, hsl(280 70% 85%), hsl(290 60% 90%));
+    /* Modern Shadows */
+    --shadow-soft: 0 8px 32px -8px hsl(220 15% 12% / 0.08);
+    --shadow-glow: 0 12px 40px -8px hsl(280 100% 85% / 0.25);
+    --shadow-elegant: 0 16px 64px -12px hsl(220 15% 12% / 0.12);
+    --shadow-pill: 0 4px 20px -4px hsl(220 15% 12% / 0.1);
+    --shadow-wellness: 0 12px 40px -8px hsl(140 45% 85% / 0.25);
 
-    /* Soft shadows */
-    --shadow-soft: 0 8px 32px -12px hsl(280 40% 70% / 0.15);
-    --shadow-glow: 0 12px 40px -8px hsl(280 65% 65% / 0.25);
-    --shadow-wellness: 0 12px 40px -8px hsl(320 50% 75% / 0.25);
-
-    /* Animations */
+    /* Smooth Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    --radius: 0.5rem;
+    /* Modern Border Radius */
+    --radius: 20px;
+    --radius-sm: 16px;
+    --radius-lg: 28px;
+    --radius-xl: 40px;
+    --radius-pill: 9999px;
 
+    /* Sidebar Variables */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark Mode Overrides */
+    --background: 220 15% 8%;         /* Deep dark background */
+    --foreground: 0 0% 95%;           /* Light foreground */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 15% 10%;              /* Dark card */
+    --card-foreground: 0 0% 95%;      /* Light card text */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 15% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 280 100% 85%;          /* Keep lavender bright */
+    --primary-foreground: 280 20% 90%; /* Light lavender text */
+    --primary-light: 280 60% 20%;     /* Darker lavender for dark mode */
+    
+    --secondary: 50 85% 65%;          /* Adjusted yellow for dark mode */
+    --secondary-foreground: 50 40% 15%; /* Dark yellow text */
+    --secondary-light: 50 60% 25%;    /* Darker yellow background */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --accent-violet: 280 70% 60%;     /* Brighter violet for dark mode */
+    --accent-orange: 18 90% 65%;      /* Adjusted orange */
+    --accent-pink: 320 60% 35%;       /* Darker pink for dark mode */
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 15% 12%;             /* Dark muted */
+    --muted-foreground: 220 10% 70%;  /* Light muted text */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --destructive: 0 75% 65%;         /* Bright red */
+    --destructive-foreground: 0 0% 100%; /* White */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --border: 220 15% 20%;            /* Dark border */
+    --input: 220 15% 15%;             /* Dark input */
+    --ring: 280 100% 85%;             /* Bright lavender ring */
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Dark gradients */
+    --gradient-bg: linear-gradient(180deg, hsl(220 15% 8%), hsl(220 15% 12%));
+    
+    /* Sidebar dark mode */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -127,5 +141,29 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+  }
+
+  /* Modern Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .font-bold {
+    font-weight: 700;
+  }
+
+  .font-extrabold {
+    font-weight: 800;
+  }
+
+  .font-black {
+    font-weight: 900;
   }
 }
