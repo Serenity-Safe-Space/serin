@@ -514,13 +514,21 @@ const Chat = () => {
               </div>
             </div>
 
-            {/* Smaller Chat Icon */}
-            <div className="relative">
+            {/* Smaller Chat Icon - Clickable */}
+            <motion.button
+              onClick={() => {
+                setShowChatInterface(false);
+                setShowPeerMatching(true);
+              }}
+              className="relative"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-br from-green-300 to-teal-300 blur-lg scale-110 opacity-60"></div>
               <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-green-400 via-teal-400 to-green-500 flex items-center justify-center shadow-xl">
                 <MessageCircle className="w-8 h-8 text-white" />
               </div>
-            </div>
+            </motion.button>
           </motion.div>
 
           {/* Centered content */}
