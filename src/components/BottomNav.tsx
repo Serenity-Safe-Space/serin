@@ -8,10 +8,10 @@ const BottomNav = () => {
   const navigate = useNavigate();
   const { appState } = useAppState();
 
-  // Only show navigation if features are available
-  const hasAvailableFeatures = appState.availableFeatures.feed || 
-                               appState.availableFeatures.communities || 
-                               appState.availableFeatures.profile;
+  // Only show navigation if features are available - with fallback safety
+  const hasAvailableFeatures = appState?.availableFeatures?.feed || 
+                               appState?.availableFeatures?.communities || 
+                               appState?.availableFeatures?.profile;
 
   // Don't render if no features are available (pure chat mode)
   if (!hasAvailableFeatures) {
@@ -24,14 +24,14 @@ const BottomNav = () => {
       icon: Sparkles, 
       label: 'What\'s Helping', 
       emoji: '✨',
-      available: appState.availableFeatures.feed 
+      available: appState?.availableFeatures?.feed || false 
     },
     { 
       path: '/communities', 
       icon: Users, 
       label: 'Community', 
       emoji: '🤝',
-      available: appState.availableFeatures.communities 
+      available: appState?.availableFeatures?.communities || false 
     },
     { 
       path: '/', 
@@ -45,7 +45,7 @@ const BottomNav = () => {
       icon: User, 
       label: 'Journey', 
       emoji: '🌱',
-      available: appState.availableFeatures.profile 
+      available: appState?.availableFeatures?.profile || false 
     }
   ].filter(item => item.available); // Only show available features
 

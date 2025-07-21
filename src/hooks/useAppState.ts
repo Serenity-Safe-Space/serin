@@ -40,12 +40,52 @@ const DEFAULT_STATE: AppState = {
 
 export const useAppState = () => {
   const [appState, setAppState] = useState<AppState>(() => {
-    const saved = localStorage.getItem('serinAppState');
-    return saved ? JSON.parse(saved) : DEFAULT_STATE;
+    try {
+      const saved = localStorage.getItem('serinAppState');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        
+        // Migration: Handle old data structure with unlockedFeatures
+        if (parsed.unlockedFeatures && !parsed.availableFeatures) {
+          return {
+            ...DEFAULT_STATE,
+            availableFeatures: {
+              feed: parsed.unlockedFeatures.feed || false,
+              communities: parsed.unlockedFeatures.communities || false,
+              profile: parsed.unlockedFeatures.profile || false,
+            },
+            conversationCount: parsed.conversationCount || 0,
+            hasCompletedWelcome: parsed.hasCompletedWelcome || false,
+          };
+        }
+        
+        // Ensure all required properties exist
+        return {
+          ...DEFAULT_STATE,
+          ...parsed,
+          availableFeatures: {
+            ...DEFAULT_STATE.availableFeatures,
+            ...(parsed.availableFeatures || {}),
+          },
+          emotionalReadiness: {
+            ...DEFAULT_STATE.emotionalReadiness,
+            ...(parsed.emotionalReadiness || {}),
+          },
+          pendingRecommendations: parsed.pendingRecommendations || [],
+        };
+      }
+    } catch (error) {
+      console.warn('Error loading app state from localStorage:', error);
+    }
+    return DEFAULT_STATE;
   });
 
   useEffect(() => {
-    localStorage.setItem('serinAppState', JSON.stringify(appState));
+    try {
+      localStorage.setItem('serinAppState', JSON.stringify(appState));
+    } catch (error) {
+      console.warn('Error saving app state to localStorage:', error);
+    }
   }, [appState]);
 
   const enableFeature = (feature: keyof AppState['availableFeatures']) => {

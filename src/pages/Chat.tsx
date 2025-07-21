@@ -135,7 +135,7 @@ const Chat = () => {
     const lowerMessage = userMessage.toLowerCase();
     
     // First meaningful conversation - suggest feed
-    if (conversationCount === 1 && !appState.availableFeatures.feed) {
+    if (conversationCount === 1 && !appState?.availableFeatures?.feed) {
       updateEmotionalReadiness('forSharing', true);
       return {
         response: "Thank you for sharing with me. 💜 Your openness touches my heart. I can sense you're ready to explore beyond our conversation. Would you like me to show you some stories and wisdom from others who've walked similar paths?",
@@ -149,7 +149,7 @@ const Chat = () => {
     }
 
     // Sense community readiness
-    if (conversationCount >= 3 && !appState.availableFeatures.communities && !appState.emotionalReadiness.forCommunity) {
+    if (conversationCount >= 3 && !appState?.availableFeatures?.communities && !appState?.emotionalReadiness?.forCommunity) {
       if (lowerMessage.includes('lonely') || lowerMessage.includes('alone') || lowerMessage.includes('connect') || lowerMessage.includes('understand')) {
         updateEmotionalReadiness('forCommunity', true);
         return {
@@ -165,7 +165,7 @@ const Chat = () => {
     }
 
     // Progress tracking when showing growth
-    if (conversationCount >= 5 && !appState.availableFeatures.profile && !appState.emotionalReadiness.forProgress) {
+    if (conversationCount >= 5 && !appState?.availableFeatures?.profile && !appState?.emotionalReadiness?.forProgress) {
       if (lowerMessage.includes('better') || lowerMessage.includes('progress') || lowerMessage.includes('grow') || lowerMessage.includes('improve')) {
         updateEmotionalReadiness('forProgress', true);
         return {
@@ -273,9 +273,9 @@ const Chat = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => appState.availableFeatures.profile && navigate('/profile')}
+          onClick={() => appState?.availableFeatures?.profile && navigate('/profile')}
           className={`h-12 w-12 p-0 rounded-full ring-2 ring-primary/20 ring-offset-2 ring-offset-background ${
-            appState.availableFeatures.profile ? 'hover:ring-primary/40' : 'opacity-60 cursor-default'
+            appState?.availableFeatures?.profile ? 'hover:ring-primary/40' : 'opacity-60 cursor-default'
           }`}
         >
           <Avatar className="h-10 w-10">
@@ -420,8 +420,8 @@ const Chat = () => {
       </main>
 
       {/* Available features navigation - only show if any features are available */}
-      {(appState.availableFeatures.feed || appState.availableFeatures.communities || appState.availableFeatures.profile) && (
-        <motion.div 
+      {(appState?.availableFeatures?.feed || appState?.availableFeatures?.communities || appState?.availableFeatures?.profile) && (
+        <motion.div
           className="fixed bottom-28 left-4 right-4"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -433,7 +433,7 @@ const Chat = () => {
                 Your wellness tools
               </p>
               <div className="flex justify-center space-x-3">
-                {appState.availableFeatures.feed && (
+                {appState?.availableFeatures?.feed && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -444,7 +444,7 @@ const Chat = () => {
                     <span>What's Helping</span>
                   </Button>
                 )}
-                {appState.availableFeatures.communities && (
+                {appState?.availableFeatures?.communities && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -455,7 +455,7 @@ const Chat = () => {
                     <span>Community</span>
                   </Button>
                 )}
-                {appState.availableFeatures.profile && (
+                {appState?.availableFeatures?.profile && (
                   <Button
                     variant="ghost"
                     size="sm"
