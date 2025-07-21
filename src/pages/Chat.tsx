@@ -497,71 +497,74 @@ const Chat = () => {
           </motion.div>
         </div>
       ) : (
-        /* Chat Interface - Microphone and Chat icons with text input */
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8">
-          {/* Large icons with glow */}
+        /* Chat Interface - Small icons on top, centered content */
+        <div className="flex-1 flex flex-col">
+          {/* Small icons at the top */}
           <motion.div
-            className="flex items-center justify-center space-x-8"
+            className="flex items-center justify-center space-x-6 pt-8 pb-4"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
           >
-            {/* Microphone Icon */}
+            {/* Smaller Microphone Icon */}
             <div className="relative">
-              <div className="absolute inset-0 w-32 h-32 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 blur-2xl scale-110 opacity-60"></div>
-              <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-500 flex items-center justify-center shadow-2xl">
-                <Mic className="w-16 h-16 text-white" />
+              <div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 blur-lg scale-110 opacity-60"></div>
+              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-500 flex items-center justify-center shadow-xl">
+                <Mic className="w-8 h-8 text-white" />
               </div>
             </div>
 
-            {/* Chat Icon */}
+            {/* Smaller Chat Icon */}
             <div className="relative">
-              <div className="absolute inset-0 w-32 h-32 rounded-full bg-gradient-to-br from-green-300 to-teal-300 blur-2xl scale-110 opacity-60"></div>
-              <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-green-400 via-teal-400 to-green-500 flex items-center justify-center shadow-2xl">
-                <MessageCircle className="w-16 h-16 text-white" />
+              <div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-br from-green-300 to-teal-300 blur-lg scale-110 opacity-60"></div>
+              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-green-400 via-teal-400 to-green-500 flex items-center justify-center shadow-xl">
+                <MessageCircle className="w-8 h-8 text-white" />
               </div>
             </div>
           </motion.div>
 
-          {/* Welcome text */}
-          <motion.div
-            className="text-center space-y-4 max-w-sm"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <h1 className="text-2xl font-medium text-purple-900 leading-relaxed">
-              hey, nice to meet you!<br />
-              i'm here to help you have the<br />
-              life you really want
-            </h1>
-          </motion.div>
+          {/* Centered content */}
+          <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8">
+            {/* Welcome text */}
+            <motion.div
+              className="text-center space-y-4 max-w-sm"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <h1 className="text-2xl font-medium text-purple-900 leading-relaxed">
+                hey, nice to meet you!<br />
+                i'm here to help you have the<br />
+                life you really want
+              </h1>
+            </motion.div>
 
-          {/* Input area */}
-          <motion.div
-            className="w-full max-w-md"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="flex items-center space-x-3 bg-white/80 backdrop-blur-sm rounded-full p-3 shadow-lg">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="message..."
-                className="flex-1 border-none bg-transparent text-gray-700 placeholder-gray-500 focus:ring-0 text-lg"
-              />
-              <Button
-                onClick={sendMessage}
-                size="sm"
-                className="w-12 h-12 rounded-full bg-purple-500 hover:bg-purple-600 text-white p-0"
-                disabled={!isUserTurn || !newMessage.trim()}
-              >
-                <Send className="w-5 h-5" />
-              </Button>
-            </div>
-          </motion.div>
+            {/* Input area */}
+            <motion.div
+              className="w-full max-w-md"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+            >
+              <div className="flex items-center space-x-3 bg-white/80 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  placeholder="message..."
+                  className="flex-1 border-none bg-transparent text-gray-700 placeholder-gray-500 focus:ring-0 text-lg"
+                />
+                <Button
+                  onClick={sendMessage}
+                  size="sm"
+                  className="w-12 h-12 rounded-full bg-purple-500 hover:bg-purple-600 text-white p-0"
+                  disabled={!isUserTurn || !newMessage.trim()}
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
+            </motion.div>
+          </div>
 
         </div>
       )}
