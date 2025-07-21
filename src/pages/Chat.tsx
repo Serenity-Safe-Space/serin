@@ -314,7 +314,7 @@ const Chat = () => {
             className="h-12 w-12 rounded-full bg-card/60 backdrop-blur-xl border border-primary/20 shadow-elegant hover:shadow-glow transition-all duration-300"
             disabled={!appState?.availableFeatures?.profile}
           >
-            <User className="h-5 w-5" />
+            <User className="h-6 w-6 text-orange-500" />
           </Button>
           <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
             👤 Your Profile
@@ -334,9 +334,9 @@ const Chat = () => {
                     variant="ghost"
                     size="sm"
                     onClick={showChatHistory}
-                    className="h-9 w-9 p-0 rounded-full hover:bg-purple-100/50"
+                    className="h-12 w-12 p-0 rounded-full hover:bg-purple-100/50"
                   >
-                    <History className="h-4 w-4" />
+                    <History className="h-6 w-6 text-blue-500" />
                   </Button>
                   <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
                     🕒 View previous chats
@@ -347,9 +347,9 @@ const Chat = () => {
                     variant="ghost"
                     size="sm"
                     onClick={showGroupChat}
-                    className="h-9 w-9 p-0 rounded-full hover:bg-purple-100/50"
+                    className="h-12 w-12 p-0 rounded-full hover:bg-purple-100/50"
                   >
-                    <Users className="h-4 w-4" />
+                    <Users className="h-6 w-6 text-green-500" />
                   </Button>
                   <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
                     👥 Find support group
@@ -370,11 +370,11 @@ const Chat = () => {
                   variant="ghost"
                   size="sm"
                   onClick={toggleVoice}
-                  className={`h-9 w-9 p-0 rounded-full transition-colors ${
+                  className={`h-12 w-12 p-0 rounded-full transition-colors ${
                     isListening ? 'bg-purple-500 text-white' : 'hover:bg-purple-100/50'
                   }`}
                 >
-                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  {isListening ? <MicOff className="h-6 w-6 text-red-500" /> : <Mic className="h-6 w-6 text-purple-500" />}
                 </Button>
                 <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
                   🎤 Talk to Serin
