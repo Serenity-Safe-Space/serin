@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, Heart, Smile, Sparkles, User } from 'lucide-react';
+import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/hooks/useAppState';
 import RecommendationCard from '@/components/RecommendationCard';
+import { useConversation } from '@11labs/react';
 
 interface Message {
   id: string;
@@ -46,7 +47,21 @@ const Chat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isUserTurn, setIsUserTurn] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Voice conversation with ElevenLabs
+  const conversation = useConversation({
+    onConnect: () => console.log('Voice connected'),
+    onDisconnect: () => setIsListening(false),
+    onMessage: (message) => {
+      // Handle voice transcription messages
+      if (message.source === 'user' && message.message) {
+        setNewMessage(message.message);
+      }
+    },
+    onError: (error) => console.error('Voice error:', error)
+  });
 
   // Typing effect for displaying messages character by character
   useEffect(() => {
@@ -259,6 +274,35 @@ const Chat = () => {
     removeRecommendation(id);
   };
 
+  const toggleVoice = async () => {
+    if (conversation.status === 'connected') {
+      await conversation.endSession();
+      setIsListening(false);
+    } else {
+      try {
+        // For demo purposes - you'll need to provide your ElevenLabs agent ID or signed URL
+        // await conversation.startSession({ agentId: 'your-agent-id' });
+        setIsListening(true);
+        console.log('Voice feature requires ElevenLabs agent configuration');
+      } catch (error) {
+        console.error('Failed to start voice conversation:', error);
+        setIsListening(false);
+      }
+    }
+  };
+
+  const showChatHistory = () => {
+    // For now, this navigates through existing messages
+    if (currentMessageIndex > 0) {
+      navigateMessages('prev');
+    }
+  };
+
+  const showGroupChat = () => {
+    // This would open group chat functionality
+    console.log('Group chat requires backend - connect to Supabase first');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-bg relative">
       {/* Floating profile avatar - always visible */}
@@ -291,34 +335,73 @@ const Chat = () => {
         <div className="max-w-lg mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <h1 className="text-lg font-bold text-foreground">Serin</h1>
-              <Badge variant="outline" className="text-xs bg-gradient-wellness text-wellness-foreground border-0">
-                Your Safe Space
-              </Badge>
+              {/* Left side icons */}
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={showChatHistory}
+                  className="h-9 w-9 p-0 rounded-full hover:bg-primary/10"
+                  title="Chat History"
+                >
+                  <History className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={showGroupChat}
+                  className="h-9 w-9 p-0 rounded-full hover:bg-primary/10"
+                  title="Find Support Group"
+                >
+                  <Users className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {/* Center title */}
+              <div className="flex items-center space-x-2">
+                <h1 className="text-lg font-bold text-foreground">Serin</h1>
+                <Badge variant="outline" className="text-xs bg-gradient-wellness text-wellness-foreground border-0">
+                  Your Safe Space
+                </Badge>
+              </div>
             </div>
             
-            {/* Message navigation */}
-            <div className="flex items-center space-x-3 text-xs text-muted-foreground">
-              <span className="font-medium">{currentMessageIndex + 1} / {allMessages.length}</span>
-              <div className="flex space-x-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigateMessages('prev')}
-                  disabled={currentMessageIndex === 0}
-                  className="h-8 w-8 p-0 rounded-full hover:bg-primary/10"
-                >
-                  ←
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigateMessages('next')}
-                  disabled={currentMessageIndex === allMessages.length - 1}
-                  className="h-8 w-8 p-0 rounded-full hover:bg-primary/10"
-                >
-                  →
-                </Button>
+            {/* Right side - Message navigation and voice */}
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleVoice}
+                className={`h-9 w-9 p-0 rounded-full transition-colors ${
+                  isListening ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/10'
+                }`}
+                title={isListening ? "Stop Voice Chat" : "Start Voice Chat"}
+              >
+                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+              
+              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                <span className="font-medium">{currentMessageIndex + 1} / {allMessages.length}</span>
+                <div className="flex space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigateMessages('prev')}
+                    disabled={currentMessageIndex === 0}
+                    className="h-8 w-8 p-0 rounded-full hover:bg-primary/10"
+                  >
+                    ←
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigateMessages('next')}
+                    disabled={currentMessageIndex === allMessages.length - 1}
+                    className="h-8 w-8 p-0 rounded-full hover:bg-primary/10"
+                  >
+                    →
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
