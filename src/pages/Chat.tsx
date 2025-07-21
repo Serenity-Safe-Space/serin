@@ -497,19 +497,29 @@ const Chat = () => {
           </motion.div>
         </div>
       ) : (
-        /* Chat Interface - Microphone icon with text input */
+        /* Chat Interface - Microphone and Chat icons with text input */
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8">
-          {/* Large microphone icon with glow */}
+          {/* Large icons with glow */}
           <motion.div
-            className="relative"
+            className="flex items-center justify-center space-x-8"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
           >
-            {/* Glow effect */}
-            <div className="absolute inset-0 w-40 h-40 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 blur-2xl scale-110 opacity-60"></div>
-            <div className="relative w-40 h-40 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-500 flex items-center justify-center shadow-2xl">
-              <Mic className="w-20 h-20 text-white" />
+            {/* Microphone Icon */}
+            <div className="relative">
+              <div className="absolute inset-0 w-32 h-32 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 blur-2xl scale-110 opacity-60"></div>
+              <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-500 flex items-center justify-center shadow-2xl">
+                <Mic className="w-16 h-16 text-white" />
+              </div>
+            </div>
+
+            {/* Chat Icon */}
+            <div className="relative">
+              <div className="absolute inset-0 w-32 h-32 rounded-full bg-gradient-to-br from-green-300 to-teal-300 blur-2xl scale-110 opacity-60"></div>
+              <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-green-400 via-teal-400 to-green-500 flex items-center justify-center shadow-2xl">
+                <MessageCircle className="w-16 h-16 text-white" />
+              </div>
             </div>
           </motion.div>
 
