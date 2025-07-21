@@ -8,12 +8,14 @@ interface PeerMatchingInterfaceProps {
   onClose: () => void;
   onBeginChat: () => void;
   onChatHistory: () => void;
+  onViewProfile?: () => void;
 }
 
 const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
   onClose,
   onBeginChat,
-  onChatHistory
+  onChatHistory,
+  onViewProfile
 }) => {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8 min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
@@ -43,14 +45,18 @@ const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Microphone Icon */}
+        {/* Microphone Icon with glow */}
         <motion.div
-          className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl"
+          className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl relative"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
         >
-          <Mic className="w-16 h-16 text-white" />
+          {/* Glow effect */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-300 to-purple-400 blur-lg scale-110 opacity-70"></div>
+          <div className="relative z-10">
+            <Mic className="w-16 h-16 text-white" />
+          </div>
         </motion.div>
 
         {/* Match Text */}
@@ -79,7 +85,10 @@ const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.8, type: "spring" }}
           >
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-200 to-pink-300 flex items-center justify-center shadow-lg">
+            <div 
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-200 to-pink-300 flex items-center justify-center shadow-lg cursor-pointer"
+              onClick={onViewProfile}
+            >
               <div className="w-20 h-20 rounded-full bg-orange-300 flex items-center justify-center relative overflow-hidden">
                 {/* Simple avatar representation */}
                 <div className="w-full h-full bg-gradient-to-b from-orange-200 to-orange-400 rounded-full flex items-center justify-center">
