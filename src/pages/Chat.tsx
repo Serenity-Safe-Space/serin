@@ -391,30 +391,6 @@ const Chat = () => {
         </div>
       </motion.div>
 
-      {/* Simplified header - only show when chat is active */}
-      {showChatInterface && (
-        <header className="bg-white/60 backdrop-blur-xl border-b border-purple-100/50 sticky top-0 z-10">
-          <div className="max-w-lg mx-auto px-6 py-4">
-            <div className="flex items-center justify-center">
-              <div className="group relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleVoice}
-                  className={`h-12 w-12 p-0 rounded-full transition-colors ${
-                    isListening ? 'bg-purple-500 text-white' : 'hover:bg-purple-100/50'
-                  }`}
-                >
-                  {isListening ? <MicOff className="h-6 w-6 text-red-500" /> : <Mic className="h-6 w-6 text-purple-500" />}
-                </Button>
-                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
-                  🎤 Talk to Serin
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-      )}
 
       {/* Conditional rendering - Welcome screen or Chat interface */}
       {!showChatInterface ? (
