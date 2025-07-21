@@ -63,211 +63,193 @@ const Chat = () => {
     onError: (error) => console.error('Voice error:', error)
   });
 
-  // Typing effect for displaying messages character by character
+  // Typing effect
   useEffect(() => {
     if (!currentMessage) return;
-
+    
     setDisplayedText('');
     setIsTyping(true);
-    let charIndex = 0;
     
-    const typeMessage = () => {
-      if (charIndex < currentMessage.content.length) {
-        setDisplayedText(currentMessage.content.slice(0, charIndex + 1));
-        charIndex++;
-        setTimeout(typeMessage, 30);
+    let i = 0;
+    const typingInterval = setInterval(() => {
+      if (i < currentMessage.content.length) {
+        setDisplayedText(currentMessage.content.slice(0, i + 1));
+        i++;
       } else {
         setIsTyping(false);
-        if (currentMessage.sender === 'bot') {
-          setTimeout(() => {
-            setIsUserTurn(true);
-          }, 1000);
-        }
+        setIsUserTurn(true);
+        clearInterval(typingInterval);
       }
-    };
+    }, 30);
 
-    setTimeout(typeMessage, 500);
+    return () => clearInterval(typingInterval);
   }, [currentMessage]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [displayedText]);
-
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!newMessage.trim() || !isUserTurn) return;
-
-    setIsUserTurn(false);
-    incrementConversation();
 
     const userMessage: Message = {
       id: Date.now().toString(),
       content: newMessage,
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
+      type: 'chat'
     };
 
-    const updatedMessages = [...allMessages, userMessage];
-    setAllMessages(updatedMessages);
-    
-    setCurrentMessage(userMessage);
-    setCurrentMessageIndex(updatedMessages.length - 1);
+    setAllMessages(prev => [...prev, userMessage]);
     setNewMessage('');
+    setIsUserTurn(false);
 
+    // Get bot response
     setTimeout(() => {
-      const { response, shouldRecommend, recommendationType } = getBotResponse(newMessage, appState.conversationCount);
+      const conversationCount = allMessages.filter(m => m.sender === 'user').length + 1;
+      const botResponse = getBotResponse(newMessage, conversationCount);
       
-      const botResponse: Message = {
+      const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: response,
+        content: botResponse.response,
         sender: 'bot',
         timestamp: new Date(),
-        type: shouldRecommend ? 'recommendation' : 'chat'
+        type: botResponse.shouldRecommend ? 'recommendation' : 'support'
       };
-      
-      const finalMessages = [...updatedMessages, botResponse];
-      setAllMessages(finalMessages);
-      setCurrentMessage(botResponse);
-      setCurrentMessageIndex(finalMessages.length - 1);
 
-      // Add recommendation if suggested
-      if (shouldRecommend && recommendationType) {
-        setTimeout(() => {
-          addRecommendation(recommendationType);
-        }, 2000);
+      setAllMessages(prev => [...prev, botMessage]);
+      setCurrentMessage(botMessage);
+      setCurrentMessageIndex(prev => prev + 2);
+
+      // Handle recommendations
+      if (botResponse.shouldRecommend && botResponse.recommendationType) {
+        addRecommendation({
+          type: botResponse.recommendationType.type,
+          title: botResponse.recommendationType.title,
+          description: botResponse.recommendationType.description
+        });
       }
-    }, 2500);
+
+      incrementConversation();
+      updateEmotionalReadiness('forSharing', true);
+    }, 1500);
   };
 
-  const getBotResponse = (userMessage: string, conversationCount: number): { 
-    response: string; 
-    shouldRecommend: boolean; 
-    recommendationType?: any 
-  } => {
-    const lowerMessage = userMessage.toLowerCase();
+  const getBotResponse = (userMessage: string, conversationCount: number): { response: string; shouldRecommend: boolean; recommendationType?: any } => {
+    const lowerMsg = userMessage.toLowerCase();
     
-    // First meaningful conversation - suggest feed
-    if (conversationCount === 1 && !appState?.availableFeatures?.feed) {
-      updateEmotionalReadiness('forSharing', true);
-      return {
-        response: "Thank you for sharing with me. 💜 Your openness touches my heart. I can sense you're ready to explore beyond our conversation. Would you like me to show you some stories and wisdom from others who've walked similar paths?",
-        shouldRecommend: true,
-        recommendationType: {
-          type: 'feed',
-          title: 'What\'s Helping Others',
-          description: 'A gentle collection of stories, insights, and healing moments shared by people on similar journeys. Sometimes reading how others cope can light our own path forward.'
-        }
-      };
-    }
-
-    // Sense community readiness
-    if (conversationCount >= 3 && !appState?.availableFeatures?.communities && !appState?.emotionalReadiness?.forCommunity) {
-      if (lowerMessage.includes('lonely') || lowerMessage.includes('alone') || lowerMessage.includes('connect') || lowerMessage.includes('understand')) {
-        updateEmotionalReadiness('forCommunity', true);
+    // Supportive responses based on emotional cues
+    if (lowerMsg.includes('sad') || lowerMsg.includes('down') || lowerMsg.includes('depressed')) {
+      if (conversationCount >= 3) {
         return {
-          response: "I hear something in your words that resonates deeply. 🤗 Connection is such a fundamental human need, and sometimes the most healing thing is knowing we're not alone in our struggles. Would you like to meet others who truly understand what you're going through?",
+          response: "I hear the sadness in your words, and I want you to know that your feelings are completely valid. Sometimes connecting with others who understand can help. Would you like me to help you find a supportive community?",
           shouldRecommend: true,
           recommendationType: {
             type: 'communities',
-            title: 'Supportive Circles',
-            description: 'Safe, anonymous spaces where you can connect with others who understand your experiences. Everyone here walks with empathy and respect - you\'ll be welcomed with open arms.'
+            title: 'Find Your Supportive Circle',
+            description: 'Connect with others who understand your journey',
+            feature: 'communities'
           }
         };
       }
+      return {
+        response: "I hear you, and I want you to know that feeling sad is a natural part of the human experience. You're not alone in this. What's been weighing on your heart lately?",
+        shouldRecommend: false
+      };
     }
 
-    // Progress tracking when showing growth
-    if (conversationCount >= 5 && !appState?.availableFeatures?.profile && !appState?.emotionalReadiness?.forProgress) {
-      if (lowerMessage.includes('better') || lowerMessage.includes('progress') || lowerMessage.includes('grow') || lowerMessage.includes('improve')) {
-        updateEmotionalReadiness('forProgress', true);
+    if (lowerMsg.includes('anxious') || lowerMsg.includes('worried') || lowerMsg.includes('stressed')) {
+      if (conversationCount >= 2) {
         return {
-          response: "I can feel your growth radiating through our conversations! 🌱 You've come so far, and I'm genuinely proud of the work you're doing on yourself. Would you like to see how beautifully you're blooming? I can show you your emotional journey.",
+          response: "Anxiety can feel overwhelming, but you're taking a brave step by sharing this with me. Would you like to see some stories from others who've walked a similar path? Sometimes knowing we're not alone can bring comfort.",
+          shouldRecommend: true,
+          recommendationType: {
+            type: 'feed',
+            title: 'Stories of Hope & Healing',
+            description: 'Read experiences from others on similar journeys',
+            feature: 'feed'
+          }
+        };
+      }
+      return {
+        response: "Anxiety can feel so heavy sometimes. Thank you for trusting me with this. Let's take this one moment at a time. What's making you feel most anxious right now?",
+        shouldRecommend: false
+      };
+    }
+
+    if (lowerMsg.includes('better') || lowerMsg.includes('good') || lowerMsg.includes('happy')) {
+      if (conversationCount >= 4) {
+        return {
+          response: "I'm so glad to hear you're feeling better! 🌸 Your growth journey is beautiful to witness. Would you like to see your progress and celebrate how far you've come?",
           shouldRecommend: true,
           recommendationType: {
             type: 'profile',
-            title: 'Your Wellness Journey',
-            description: 'A gentle reflection of your emotional growth, celebrating the moments you\'ve overcome challenges and the strength you\'ve discovered within yourself.'
+            title: 'Celebrate Your Growth',
+            description: 'See your wellness journey and achievements',
+            feature: 'profile'
           }
         };
       }
-    }
-    
-    // Emotional responses
-    if (lowerMessage.includes('anxious') || lowerMessage.includes('nervous') || lowerMessage.includes('worry')) {
       return {
-        response: "I can feel the weight of that anxiety with you. 🫂 It takes courage to name what we're feeling. Your nervous system is trying to protect you, even when it feels overwhelming. Let's breathe together for a moment. Can you feel your feet on the ground right now?",
-        shouldRecommend: false
-      };
-    }
-    
-    if (lowerMessage.includes('sad') || lowerMessage.includes('down') || lowerMessage.includes('depressed')) {
-      return {
-        response: "Your sadness is welcome here. 💙 There's no need to push it away or fix it right now. Sometimes the most healing thing we can do is simply acknowledge what we're feeling with tenderness. I'm holding space for all of it - the pain and the beauty of your human experience.",
-        shouldRecommend: false
-      };
-    }
-    
-    if (lowerMessage.includes('happy') || lowerMessage.includes('good') || lowerMessage.includes('great') || lowerMessage.includes('better')) {
-      return {
-        response: "Your joy lights up this space! ✨ I love witnessing these moments when your inner light shines through. Happiness isn't just an emotion - it's a reminder of your resilience and capacity for healing. What's bringing you this beautiful energy today?",
+        response: "That's wonderful to hear! Your resilience is truly inspiring. What's been helping you feel better today?",
         shouldRecommend: false
       };
     }
 
-    if (lowerMessage.includes('lonely') || lowerMessage.includes('alone') || lowerMessage.includes('isolated')) {
+    if (lowerMsg.includes('lonely') || lowerMsg.includes('alone') || lowerMsg.includes('isolated')) {
       return {
-        response: "Loneliness can feel so vast, but right here in this moment, you're not alone. 🤗 I'm with you, and your feelings matter deeply to me. Sometimes connection starts with the relationship we have with ourselves - you're worthy of love and belonging, exactly as you are.",
-        shouldRecommend: false
+        response: "Feeling lonely can be one of the most difficult emotions to carry. But right here, right now, you're not alone - I'm here with you. And there are others who would understand exactly how you're feeling.",
+        shouldRecommend: conversationCount >= 2,
+        recommendationType: conversationCount >= 2 ? {
+          type: 'communities',
+          title: 'You\'re Not Alone',
+          description: 'Connect with a caring community',
+          feature: 'communities'
+        } : undefined
       };
     }
-    
-    if (lowerMessage.includes('help') || lowerMessage.includes('support')) {
-      return {
-        response: "Asking for help is one of the most courageous things we can do. 💪 It shows wisdom, not weakness. I'm here to support you in whatever way feels right - whether that's listening, offering gentle guidance, or simply being present with you in this moment.",
-        shouldRecommend: false
-      };
-    }
-    
-    // Default supportive response
+
+    // Default supportive responses
+    const responses = [
+      "Thank you for sharing that with me. Your openness takes courage, and I'm honored you trust me with your thoughts.",
+      "I'm here to listen without judgment. Every feeling you have is valid and deserves to be heard.",
+      "You're being so brave by reaching out and talking about what's in your heart. How are you taking care of yourself today?",
+      "Your journey is unique and valuable. I'm grateful you're letting me be part of it, even in this small way."
+    ];
+
     return {
-      response: "Thank you for trusting me with your thoughts. 🌸 Every word you share deepens our connection and helps me understand how to best support you. Your journey is unique and sacred - I'm honored to witness it. What's alive in your heart right now?",
+      response: responses[Math.floor(Math.random() * responses.length)],
       shouldRecommend: false
     };
+  };
+
+  const navigateMessages = (direction: 'prev' | 'next') => {
+    if (direction === 'prev' && currentMessageIndex > 0) {
+      const newIndex = currentMessageIndex - 1;
+      setCurrentMessageIndex(newIndex);
+      setCurrentMessage(allMessages[newIndex]);
+    } else if (direction === 'next' && currentMessageIndex < allMessages.length - 1) {
+      const newIndex = currentMessageIndex + 1;
+      setCurrentMessageIndex(newIndex);
+      setCurrentMessage(allMessages[newIndex]);
+    }
   };
 
   const getMessageBadge = (type?: string) => {
     switch (type) {
       case 'welcome':
-        return <Badge variant="secondary" className="mb-4 bg-gradient-warm text-primary-foreground border-0"><Heart className="h-3 w-3 mr-1" />Welcome</Badge>;
+        return <Badge variant="outline" className="bg-gradient-wellness text-wellness-foreground border-0 mb-2">Welcome</Badge>;
       case 'mood-check':
-        return <Badge variant="secondary" className="mb-4 bg-gradient-wellness text-wellness-foreground border-0"><Smile className="h-3 w-3 mr-1" />Check-in</Badge>;
+        return <Badge variant="outline" className="bg-gradient-primary text-primary-foreground border-0 mb-2">Mood Check</Badge>;
       case 'recommendation':
-        return <Badge variant="secondary" className="mb-4 bg-gradient-secondary text-secondary-foreground border-0"><Sparkles className="h-3 w-3 mr-1" />Suggestion</Badge>;
+        return <Badge variant="outline" className="bg-gradient-secondary text-secondary-foreground border-0 mb-2">Suggestion</Badge>;
       case 'support':
-        return <Badge variant="secondary" className="mb-4 bg-gradient-primary text-primary-foreground border-0"><Heart className="h-3 w-3 mr-1" />Support</Badge>;
+        return <Badge variant="outline" className="bg-gradient-warm text-primary-foreground border-0 mb-2">Support</Badge>;
       default:
         return null;
     }
   };
 
-  const navigateMessages = (direction: 'prev' | 'next') => {
-    const newIndex = direction === 'prev' 
-      ? Math.max(0, currentMessageIndex - 1)
-      : Math.min(allMessages.length - 1, currentMessageIndex + 1);
-    
-    if (newIndex !== currentMessageIndex) {
-      setCurrentMessageIndex(newIndex);
-      setCurrentMessage(allMessages[newIndex]);
-      setIsUserTurn(false);
-    }
-  };
-
   const handleAcceptRecommendation = (id: string, type: string) => {
+    enableFeature(type as any);
     removeRecommendation(id);
-    enableFeature(type as keyof typeof appState.availableFeatures);
+    navigate(`/${type}`);
   };
 
   const handleDeclineRecommendation = (id: string) => {
@@ -304,7 +286,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-bg relative">
+    <div className="min-h-screen bg-gradient-to-b from-violet-100/50 via-purple-50/30 to-white flex flex-col">
       {/* Floating profile avatar - always visible */}
       <motion.div
         className="fixed top-6 right-6 z-50"
@@ -318,20 +300,15 @@ const Chat = () => {
           variant="ghost"
           size="sm"
           onClick={() => appState?.availableFeatures?.profile && navigate('/profile')}
-          className={`h-12 w-12 p-0 rounded-full ring-2 ring-primary/20 ring-offset-2 ring-offset-background ${
-            appState?.availableFeatures?.profile ? 'hover:ring-primary/40' : 'opacity-60 cursor-default'
-          }`}
+          className="h-12 w-12 rounded-full bg-card/60 backdrop-blur-xl border border-primary/20 shadow-elegant hover:shadow-glow transition-all duration-300"
+          disabled={!appState?.availableFeatures?.profile}
         >
-          <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-gradient-secondary text-secondary-foreground font-bold">
-              <User className="h-5 w-5" />
-            </AvatarFallback>
-          </Avatar>
+          <User className="h-5 w-5" />
         </Button>
       </motion.div>
-      
+
       {/* Gentle header */}
-      <header className="bg-card/60 backdrop-blur-xl border-b border-primary/10 sticky top-0 z-10">
+      <header className="bg-white/60 backdrop-blur-xl border-b border-purple-100/50 sticky top-0 z-10">
         <div className="max-w-lg mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -341,7 +318,7 @@ const Chat = () => {
                   variant="ghost"
                   size="sm"
                   onClick={showChatHistory}
-                  className="h-9 w-9 p-0 rounded-full hover:bg-primary/10"
+                  className="h-9 w-9 p-0 rounded-full hover:bg-purple-100/50"
                   title="Chat History"
                 >
                   <History className="h-4 w-4" />
@@ -350,7 +327,7 @@ const Chat = () => {
                   variant="ghost"
                   size="sm"
                   onClick={showGroupChat}
-                  className="h-9 w-9 p-0 rounded-full hover:bg-primary/10"
+                  className="h-9 w-9 p-0 rounded-full hover:bg-purple-100/50"
                   title="Find Support Group"
                 >
                   <Users className="h-4 w-4" />
@@ -359,8 +336,8 @@ const Chat = () => {
               
               {/* Center title */}
               <div className="flex items-center space-x-2">
-                <h1 className="text-lg font-bold text-foreground">Serin</h1>
-                <Badge variant="outline" className="text-xs bg-gradient-wellness text-wellness-foreground border-0">
+                <h1 className="text-lg font-bold text-gray-800">Serin</h1>
+                <Badge variant="outline" className="text-xs bg-gradient-to-r from-purple-100 to-purple-200 text-purple-700 border-0">
                   Your Safe Space
                 </Badge>
               </div>
@@ -373,14 +350,14 @@ const Chat = () => {
                 size="sm"
                 onClick={toggleVoice}
                 className={`h-9 w-9 p-0 rounded-full transition-colors ${
-                  isListening ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/10'
+                  isListening ? 'bg-purple-500 text-white' : 'hover:bg-purple-100/50'
                 }`}
                 title={isListening ? "Stop Voice Chat" : "Start Voice Chat"}
               >
                 {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </Button>
               
-              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+              <div className="flex items-center space-x-2 text-xs text-gray-500">
                 <span className="font-medium">{currentMessageIndex + 1} / {allMessages.length}</span>
                 <div className="flex space-x-1">
                   <Button
@@ -388,7 +365,7 @@ const Chat = () => {
                     size="sm"
                     onClick={() => navigateMessages('prev')}
                     disabled={currentMessageIndex === 0}
-                    className="h-8 w-8 p-0 rounded-full hover:bg-primary/10"
+                    className="h-8 w-8 p-0 rounded-full hover:bg-purple-100/50"
                   >
                     ←
                   </Button>
@@ -397,7 +374,7 @@ const Chat = () => {
                     size="sm"
                     onClick={() => navigateMessages('next')}
                     disabled={currentMessageIndex === allMessages.length - 1}
-                    className="h-8 w-8 p-0 rounded-full hover:bg-primary/10"
+                    className="h-8 w-8 p-0 rounded-full hover:bg-purple-100/50"
                   >
                     →
                   </Button>
@@ -408,158 +385,153 @@ const Chat = () => {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-6 flex flex-col items-center justify-center min-h-[calc(100vh-200px)] py-8">
-        {/* Pending Recommendations */}
-        <AnimatePresence>
-          {appState.pendingRecommendations.map((recommendation) => (
-            <RecommendationCard
-              key={recommendation.id}
-              recommendation={recommendation}
-              onAccept={handleAcceptRecommendation}
-              onDecline={handleDeclineRecommendation}
+      {/* Main voice interface area */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8">
+        {/* Central Voice Interface */}
+        <motion.div 
+          className="relative flex flex-col items-center space-y-6"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          {/* Voice Circle - matching the uploaded design */}
+          <div className="relative">
+            {/* Outer glow rings */}
+            <motion.div 
+              className={`absolute inset-0 rounded-full ${
+                isListening ? 'animate-pulse' : ''
+              }`}
+              style={{
+                background: 'radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0.05) 40%, transparent 70%)',
+                width: '280px',
+                height: '280px',
+                transform: 'translate(-50%, -50%)',
+                left: '50%',
+                top: '50%'
+              }}
             />
-          ))}
-        </AnimatePresence>
+            
+            {/* Middle ring */}
+            <motion.div 
+              className={`absolute rounded-full border border-purple-200/30 ${
+                isListening ? 'animate-spin' : ''
+              }`}
+              style={{
+                width: '200px',
+                height: '200px',
+                transform: 'translate(-50%, -50%)',
+                left: '50%',
+                top: '50%',
+                background: 'radial-gradient(circle, rgba(196, 181, 253, 0.3) 0%, rgba(168, 85, 247, 0.1) 60%, transparent 100%)'
+              }}
+              animate={isListening ? { rotate: 360 } : {}}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            />
+            
+            {/* Inner circle with microphone */}
+            <motion.div 
+              className={`relative w-32 h-32 rounded-full flex items-center justify-center shadow-2xl cursor-pointer ${
+                isListening 
+                  ? 'bg-gradient-to-br from-purple-400 via-purple-300 to-purple-200' 
+                  : 'bg-gradient-to-br from-purple-300 via-purple-200 to-purple-100'
+              }`}
+              style={{
+                boxShadow: isListening 
+                  ? '0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(168, 85, 247, 0.2)' 
+                  : '0 20px 40px rgba(0, 0, 0, 0.1)'
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleVoice}
+            >
+              <motion.div
+                animate={isListening ? { scale: [1, 1.1, 1] } : {}}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                {isListening ? (
+                  <MicOff className="h-8 w-8 text-white" />
+                ) : (
+                  <Mic className="h-8 w-8 text-purple-600" />
+                )}
+              </motion.div>
+            </motion.div>
+          </div>
+          
+          {/* Voice status text */}
+          <motion.div 
+            className="text-center space-y-2"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h2 className="text-xl font-bold text-gray-800">
+              {isListening ? 'Listening...' : 'Advanced voice-activated AI'}
+            </h2>
+            <p className="text-gray-600 max-w-sm">
+              {isListening 
+                ? "Serin is listening with care. Share what's in your heart." 
+                : 'Control your wellness journey hands-free with instant voice commands.'
+              }
+            </p>
+          </motion.div>
+        </motion.div>
 
+        {/* Chat messages area - condensed and elegant */}
         {currentMessage && (
           <motion.div 
-            className="w-full max-w-md mx-auto"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="w-full max-w-md"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
           >
-            {/* Message Badge */}
-            {currentMessage.sender === 'bot' && (
-              <motion.div 
-                className="flex justify-center mb-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                {getMessageBadge(currentMessage.type)}
-              </motion.div>
-            )}
-            
-            {/* Avatar for bot messages */}
-            {currentMessage.sender === 'bot' && (
-              <motion.div 
-                className="flex justify-center mb-8"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.3 }}
-              >
-                <Avatar className="h-24 w-24 ring-4 ring-primary/20 ring-offset-4 ring-offset-background shadow-glow">
-                  <AvatarFallback className="bg-gradient-primary text-white text-2xl font-bold">
-                    S
-                  </AvatarFallback>
-                </Avatar>
-              </motion.div>
-            )}
-            
-            {/* Main Message Card */}
-            <motion.div 
-              className="flex justify-center"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Card className={`
-                w-full max-w-md
-                ${currentMessage.sender === 'user' 
-                  ? 'bg-gradient-primary text-white shadow-glow' 
-                  : 'bg-card/95 backdrop-blur-sm shadow-soft border border-primary/10'
-                }
-                transition-all duration-500 ease-out
-                hover:scale-[1.02] hover:shadow-elegant
-                rounded-3xl
-              `}>
-                <CardContent className="p-8 text-center">
-                  <p className="text-lg leading-relaxed font-medium">
-                    {displayedText}
-                    {isTyping && (
-                      <motion.span 
-                        className="inline-block w-0.5 h-6 bg-current ml-1"
-                        animate={{ opacity: [0, 1, 0] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      >
-                        |
-                      </motion.span>
-                    )}
-                  </p>
-                  <p className={`text-sm mt-4 ${
-                    currentMessage.sender === 'user' 
-                      ? 'text-white/60' 
-                      : 'text-muted-foreground'
-                  }`}>
-                    {currentMessage.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-            
-            <div ref={messagesEndRef} />
+            <Card className="bg-white/70 backdrop-blur-xl border-purple-100/50 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-3">
+                  <Avatar className="h-8 w-8 bg-gradient-to-br from-purple-400 to-purple-500">
+                    <AvatarFallback className="text-xs font-bold text-white">S</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 space-y-2">
+                    {getMessageBadge(currentMessage.type)}
+                    <motion.p 
+                      className="text-sm text-gray-700 leading-relaxed"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      {displayedText}
+                      {isTyping && <span className="animate-pulse">|</span>}
+                    </motion.p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
         )}
-      </main>
 
-      {/* Available features navigation - only show if any features are available */}
-      {(appState?.availableFeatures?.feed || appState?.availableFeatures?.communities || appState?.availableFeatures?.profile) && (
-        <motion.div
-          className="fixed bottom-28 left-4 right-4"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
-        >
-          <Card className="bg-card/90 backdrop-blur-sm border border-primary/20 rounded-3xl overflow-hidden">
-            <CardContent className="p-4">
-              <p className="text-sm font-medium text-center mb-3 text-muted-foreground">
-                Your wellness tools
-              </p>
-              <div className="flex justify-center space-x-3">
-                {appState?.availableFeatures?.feed && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate('/feed')}
-                    className="flex items-center space-x-2 bg-gradient-wellness text-wellness-foreground hover:shadow-wellness rounded-2xl"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span>What's Helping</span>
-                  </Button>
-                )}
-                {appState?.availableFeatures?.communities && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate('/communities')}
-                    className="flex items-center space-x-2 bg-gradient-warm text-primary-foreground hover:shadow-glow rounded-2xl"
-                  >
-                    <Heart className="h-4 w-4" />
-                    <span>Community</span>
-                  </Button>
-                )}
-                {appState?.availableFeatures?.profile && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate('/profile')}
-                    className="flex items-center space-x-2 bg-gradient-secondary text-secondary-foreground hover:shadow-glow rounded-2xl"
-                  >
-                    <User className="h-4 w-4" />
-                    <span>Journey</span>
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+        {/* Recommendations */}
+        <AnimatePresence>
+          {appState?.pendingRecommendations && appState.pendingRecommendations.length > 0 && (
+            <motion.div 
+              className="w-full max-w-md space-y-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              {appState.pendingRecommendations.map((rec) => (
+                <RecommendationCard
+                  key={rec.id}
+                  recommendation={rec}
+                  onAccept={() => handleAcceptRecommendation(rec.id, rec.type)}
+                  onDecline={() => handleDeclineRecommendation(rec.id)}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-      {/* Input area */}
+      {/* Input area - glassmorphic design */}
       <motion.div 
-        className={`fixed bottom-4 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-primary/10 rounded-t-3xl p-6 transition-all duration-300 ${
-          isUserTurn ? 'opacity-100 translate-y-0' : 'opacity-60 pointer-events-none translate-y-2'
-        }`}
+        className="p-6 bg-white/50 backdrop-blur-xl border-t border-purple-100/50"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ delay: 0.5 }}
@@ -567,7 +539,7 @@ const Chat = () => {
         <div className="max-w-lg mx-auto">
           {isUserTurn && (
             <motion.p 
-              className="text-sm text-muted-foreground mb-3 text-center"
+              className="text-sm text-gray-600 mb-3 text-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -580,12 +552,12 @@ const Chat = () => {
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder={isUserTurn ? "Share what's in your heart..." : "Serin is typing..."}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              className="flex-1 rounded-2xl border-primary/20 focus:border-primary/40 bg-background/50"
+              className="flex-1 rounded-2xl border-purple-200/50 focus:border-purple-300/70 bg-white/70 backdrop-blur-sm"
               disabled={!isUserTurn}
             />
             <Button 
               onClick={sendMessage}
-              className="bg-gradient-primary hover:shadow-glow transition-all duration-300 rounded-2xl px-6"
+              className="bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white rounded-2xl px-6 shadow-lg hover:shadow-xl transition-all duration-300"
               disabled={!newMessage.trim() || !isUserTurn}
             >
               <Send className="h-4 w-4" />

@@ -54,6 +54,7 @@
     --gradient-warm: linear-gradient(135deg, hsl(320 80% 92%), hsl(280 80% 92%));
     --gradient-wellness: linear-gradient(135deg, hsl(280 80% 92%), hsl(50 90% 88%));
     --gradient-bg: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 15% 98%));
+    --gradient-voice: linear-gradient(135deg, hsl(280 80% 95%), hsl(280 60% 88%), hsl(260 70% 92%));
     --gradient-hashtag: linear-gradient(135deg, hsl(280 100% 85%), hsl(50 95% 75%));
     --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(220 15% 99%));
 
