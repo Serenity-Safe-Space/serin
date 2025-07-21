@@ -48,6 +48,7 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isUserTurn, setIsUserTurn] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Voice conversation with ElevenLabs
@@ -84,6 +85,15 @@ const Chat = () => {
 
     return () => clearInterval(typingInterval);
   }, [currentMessage]);
+
+  // Auto-hide onboarding after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowOnboarding(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const sendMessage = () => {
     if (!newMessage.trim() || !isUserTurn) return;
@@ -296,15 +306,20 @@ const Chat = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => appState?.availableFeatures?.profile && navigate('/profile')}
-          className="h-12 w-12 rounded-full bg-card/60 backdrop-blur-xl border border-primary/20 shadow-elegant hover:shadow-glow transition-all duration-300"
-          disabled={!appState?.availableFeatures?.profile}
-        >
-          <User className="h-5 w-5" />
-        </Button>
+        <div className="group relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => appState?.availableFeatures?.profile && navigate('/profile')}
+            className="h-12 w-12 rounded-full bg-card/60 backdrop-blur-xl border border-primary/20 shadow-elegant hover:shadow-glow transition-all duration-300"
+            disabled={!appState?.availableFeatures?.profile}
+          >
+            <User className="h-5 w-5" />
+          </Button>
+          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+            👤 Your Profile
+          </div>
+        </div>
       </motion.div>
 
       {/* Gentle header */}
@@ -314,48 +329,57 @@ const Chat = () => {
             <div className="flex items-center space-x-3">
               {/* Left side icons */}
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={showChatHistory}
-                  className="h-9 w-9 p-0 rounded-full hover:bg-purple-100/50"
-                  title="Chat History"
-                >
-                  <History className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={showGroupChat}
-                  className="h-9 w-9 p-0 rounded-full hover:bg-purple-100/50"
-                  title="Find Support Group"
-                >
-                  <Users className="h-4 w-4" />
-                </Button>
+                <div className="group relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={showChatHistory}
+                    className="h-9 w-9 p-0 rounded-full hover:bg-purple-100/50"
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                    🕒 View previous chats
+                  </div>
+                </div>
+                <div className="group relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={showGroupChat}
+                    className="h-9 w-9 p-0 rounded-full hover:bg-purple-100/50"
+                  >
+                    <Users className="h-4 w-4" />
+                  </Button>
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                    👥 Find support group
+                  </div>
+                </div>
               </div>
               
-              {/* Center title */}
-              <div className="flex items-center space-x-2">
-                <h1 className="text-lg font-bold text-gray-800">Serin</h1>
-                <Badge variant="outline" className="text-xs bg-gradient-to-r from-purple-100 to-purple-200 text-purple-700 border-0">
-                  Your Safe Space
-                </Badge>
-              </div>
+            {/* Center title */}
+            <div className="flex items-center space-x-2">
+              <h1 className="text-lg font-bold text-gray-800">Talk to Serin</h1>
+            </div>
             </div>
             
             {/* Right side - Message navigation and voice */}
             <div className="flex items-center space-x-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleVoice}
-                className={`h-9 w-9 p-0 rounded-full transition-colors ${
-                  isListening ? 'bg-purple-500 text-white' : 'hover:bg-purple-100/50'
-                }`}
-                title={isListening ? "Stop Voice Chat" : "Start Voice Chat"}
-              >
-                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              </Button>
+              <div className="group relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleVoice}
+                  className={`h-9 w-9 p-0 rounded-full transition-colors ${
+                    isListening ? 'bg-purple-500 text-white' : 'hover:bg-purple-100/50'
+                  }`}
+                >
+                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                </Button>
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                  🎤 Talk to Serin
+                </div>
+              </div>
               
               <div className="flex items-center space-x-2 text-xs text-gray-500">
                 <span className="font-medium">{currentMessageIndex + 1} / {allMessages.length}</span>
@@ -443,6 +467,24 @@ const Chat = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleVoice}
+              animate={isListening ? { 
+                boxShadow: [
+                  '0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(168, 85, 247, 0.2)',
+                  '0 0 60px rgba(168, 85, 247, 0.6), 0 0 120px rgba(168, 85, 247, 0.3)',
+                  '0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(168, 85, 247, 0.2)'
+                ]
+              } : {
+                // Gentle glow on page load
+                boxShadow: [
+                  '0 20px 40px rgba(0, 0, 0, 0.1)',
+                  '0 0 30px rgba(168, 85, 247, 0.2), 0 20px 40px rgba(0, 0, 0, 0.1)',
+                  '0 20px 40px rgba(0, 0, 0, 0.1)'
+                ]
+              }}
+              transition={isListening 
+                ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                : { duration: 3, repeat: 2, ease: "easeInOut", delay: 1 }
+              }
             >
               <motion.div
                 animate={isListening ? { scale: [1, 1.1, 1] } : {}}
@@ -459,20 +501,58 @@ const Chat = () => {
           
           {/* Voice status text */}
           <motion.div 
-            className="text-center space-y-2"
+            className="text-center space-y-3 relative"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
             <h2 className="text-xl font-bold text-gray-800">
-              {isListening ? 'Listening...' : 'Advanced voice-activated AI'}
+              {isListening ? 'I\'m listening...' : 'Talk to Serin'}
             </h2>
             <p className="text-gray-600 max-w-sm">
-              {isListening 
-                ? "Serin is listening with care. Share what's in your heart." 
-                : 'Control your wellness journey hands-free with instant voice commands.'
-              }
+              Just say how you feel or ask a question — I'm listening.
             </p>
+            
+            {/* Suggestion button */}
+            <motion.button
+              onClick={() => setNewMessage("Help me relax")}
+              className="mt-4 px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-full text-sm transition-colors"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              Help me relax
+            </motion.button>
+            
+            {/* Onboarding tooltip */}
+            <AnimatePresence>
+              {showOnboarding && (
+                <motion.div
+                  className="absolute top-full mt-4 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-lg shadow-lg border border-purple-100 max-w-xs z-30"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ delay: 2 }}
+                >
+                  <p className="text-sm text-gray-600 mb-3">Here are a few things you can ask me...</p>
+                  <div className="space-y-2">
+                    {[
+                      "✅ I feel anxious",
+                      "✅ Help me fall asleep", 
+                      "✅ Can I talk to someone?"
+                    ].map((item) => (
+                      <p key={item} className="text-xs text-purple-600">{item}</p>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setShowOnboarding(false)}
+                    className="mt-3 text-xs text-gray-400 hover:text-gray-600"
+                  >
+                    Skip
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
 
@@ -529,42 +609,63 @@ const Chat = () => {
         </AnimatePresence>
       </div>
 
-      {/* Input area - glassmorphic design */}
-      <motion.div 
-        className="p-6 bg-white/50 backdrop-blur-xl border-t border-purple-100/50"
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
+      {/* Input area - at bottom */}
+      <div className="bg-white/80 backdrop-blur-xl border-t border-purple-100/50 p-6">
         <div className="max-w-lg mx-auto">
-          {isUserTurn && (
-            <motion.p 
-              className="text-sm text-gray-600 mb-3 text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              Serin is listening with care... 💜
-            </motion.p>
-          )}
-          <div className="flex space-x-3">
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder={isUserTurn ? "Share what's in your heart..." : "Serin is typing..."}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              className="flex-1 rounded-2xl border-purple-200/50 focus:border-purple-300/70 bg-white/70 backdrop-blur-sm"
-              disabled={!isUserTurn}
-            />
-            <Button 
-              onClick={sendMessage}
-              className="bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white rounded-2xl px-6 shadow-lg hover:shadow-xl transition-all duration-300"
-              disabled={!newMessage.trim() || !isUserTurn}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
+          <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="space-y-4">
+            {/* Message input */}
+            <div className="flex space-x-3">
+              <div className="flex-1 relative">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder={newMessage ? newMessage : "Tell me what's on your mind..."}
+                  disabled={!isUserTurn || isTyping}
+                  className="pr-20 py-3 text-base border-purple-200/50 focus:border-purple-300 focus:ring-purple-300/20 bg-white/70 min-h-[48px]"
+                />
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+                  <Button
+                    type="button"
+                    onClick={toggleVoice}
+                    className={`h-8 w-8 p-0 rounded-full ${
+                      isListening ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
+                    }`}
+                  >
+                    <Mic className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={!newMessage.trim() || !isUserTurn || isTyping}
+                    className="h-8 w-8 p-0 rounded-full bg-gradient-primary hover:bg-gradient-primary/90"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Input suggestions */}
+            {!newMessage && (
+              <div className="flex flex-wrap gap-2 justify-center">
+                {[
+                  "I feel overwhelmed...",
+                  "Can I ask a question?",
+                  "Help me fall asleep"
+                ].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => setNewMessage(suggestion)}
+                    className="px-3 py-1 text-xs bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-full transition-colors"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
+          </form>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
