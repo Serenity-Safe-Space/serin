@@ -25,8 +25,8 @@ const GroupChatInterface: React.FC<GroupChatInterfaceProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-screen bg-gradient-to-br from-purple-50 to-pink-50">
-      {/* Header with avatars */}
+    <div className="flex-1 flex flex-col bg-gradient-to-br from-purple-50 to-pink-50">
+      {/* Header with avatars - no fixed positioning since it's handled by parent */}
       <motion.div 
         className="flex items-center justify-center space-x-12 pt-12 pb-8"
         initial={{ opacity: 0, y: -20 }}

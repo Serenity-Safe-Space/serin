@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy, MessageCircle } from 'lucide-react';
+import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy, MessageCircle, ArrowLeft, Bot } from 'lucide-react';
 import PeerMatchingInterface from '@/components/PeerMatchingInterface';
 import GroupChatInterface from '@/components/GroupChatInterface';
 import ProfileView from '@/components/ProfileView';
@@ -60,6 +60,7 @@ const Chat = () => {
   const [showPeerMatching, setShowPeerMatching] = useState(false);
   const [showGroupChat, setShowGroupChat] = useState(false);
   const [showProfileView, setShowProfileView] = useState(false);
+  const [chatMode, setChatMode] = useState<'ai' | 'peer'>('ai'); // Track current chat mode
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Voice conversation with ElevenLabs
@@ -323,6 +324,7 @@ const Chat = () => {
   const handleBeginChat = () => {
     setShowPeerMatching(false);
     setShowGroupChat(true);
+    setChatMode('peer'); // Set to peer chat mode
   };
 
   const handleChatHistory = () => {
@@ -341,6 +343,24 @@ const Chat = () => {
     setShowProfileView(false);
     setShowChatInterface(false);
     setShowOnboarding(true);
+    setChatMode('ai'); // Reset to AI chat mode
+  };
+
+  // Function to switch between AI and peer chat
+  const switchToPeerChat = () => {
+    if (chatMode === 'ai') {
+      setShowChatInterface(false);
+      setShowGroupChat(true);
+      setChatMode('peer');
+    }
+  };
+
+  const switchToAIChat = () => {
+    if (chatMode === 'peer') {
+      setShowGroupChat(false);
+      setShowChatInterface(true);
+      setChatMode('ai');
+    }
   };
 
   // Show peer matching interface
@@ -355,9 +375,37 @@ const Chat = () => {
     );
   }
 
-  // Show group chat interface
+  // Show group chat interface with navigation
   if (showGroupChat) {
-    return <GroupChatInterface onClose={handleCloseAll} />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex flex-col">
+        {/* Navigation header for group chat */}
+        <div className="flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm border-b border-purple-100/50">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={switchToAIChat}
+            className="flex items-center space-x-2 text-purple-600 hover:bg-purple-100/50"
+          >
+            <Bot className="w-5 h-5" />
+            <span>AI Chat</span>
+          </Button>
+          
+          <h2 className="text-lg font-semibold text-purple-900">Peer Chat</h2>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCloseAll}
+            className="text-purple-600 hover:bg-purple-100/50"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        </div>
+        
+        <GroupChatInterface onClose={handleCloseAll} />
+      </div>
+    );
   }
 
   // Show profile view
@@ -490,19 +538,16 @@ const Chat = () => {
               </div>
             </div>
 
-            {/* Smaller Chat Icon - Clickable */}
+            {/* Smaller Chat Icon - Clickable to switch to peer chat */}
             <motion.button
-              onClick={() => {
-                setShowChatInterface(false);
-                setShowPeerMatching(true);
-              }}
+              onClick={switchToPeerChat}
               className="relative"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-br from-green-300 to-teal-300 blur-lg scale-110 opacity-60"></div>
               <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-green-400 via-teal-400 to-green-500 flex items-center justify-center shadow-xl">
-                <MessageCircle className="w-8 h-8 text-white" />
+                <Users className="w-8 h-8 text-white" />
               </div>
             </motion.button>
           </motion.div>
