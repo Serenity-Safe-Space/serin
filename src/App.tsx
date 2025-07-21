@@ -19,10 +19,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Auth />} />
+          <Route path="/" element={<Chat />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/communities" element={<Communities />} />
-          <Route path="/chat" element={<Chat />} />
           <Route path="/profile" element={<Profile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

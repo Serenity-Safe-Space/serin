@@ -4,7 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, Heart, BarChart3, Smile, History, Plus, Archive } from 'lucide-react';
+import { Send, Heart, BarChart3, Smile, Unlock, Users, BookOpen, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useAppState } from '@/hooks/useAppState';
+import FloatingAvatar from '@/components/FloatingAvatar';
 import BottomNav from '@/components/BottomNav';
 
 interface Message {
@@ -12,17 +16,20 @@ interface Message {
   content: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  type?: 'mood-check' | 'tip' | 'support' | 'chat';
+  type?: 'welcome' | 'mood-check' | 'unlock' | 'support' | 'chat';
 }
 
 const Chat = () => {
+  const { appState, unlockFeature, incrementConversation, completeWelcome } = useAppState();
+  const navigate = useNavigate();
+  
   const [allMessages, setAllMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hey there! 🌟 I'm Serin, your wellness companion. How are you feeling today?",
+      content: "Hello, beautiful soul. 🌸 I'm Serin, your personal wellness companion. I'm here to listen, support, and guide you through your mental health journey. How are you feeling today?",
       sender: 'bot',
       timestamp: new Date(Date.now() - 60000),
-      type: 'mood-check'
+      type: 'welcome'
     }
   ]);
   
@@ -32,7 +39,7 @@ const Chat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isUserTurn, setIsUserTurn] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const [showUnlockCard, setShowUnlockCard] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Typing effect for displaying messages character by character
@@ -47,20 +54,20 @@ const Chat = () => {
       if (charIndex < currentMessage.content.length) {
         setDisplayedText(currentMessage.content.slice(0, charIndex + 1));
         charIndex++;
-        setTimeout(typeMessage, 25); // Slightly faster typing for Apple feel
+        setTimeout(typeMessage, 30); // Gentle typing speed
       } else {
         setIsTyping(false);
         // If it's a bot message, wait a moment then allow user input
         if (currentMessage.sender === 'bot') {
           setTimeout(() => {
             setIsUserTurn(true);
-          }, 800);
+          }, 1000);
         }
       }
     };
 
-    // Add a pop animation delay before starting to type
-    setTimeout(typeMessage, 300);
+    // Add a gentle delay before starting to type
+    setTimeout(typeMessage, 500);
   }, [currentMessage]);
 
   const scrollToBottom = () => {
@@ -75,6 +82,7 @@ const Chat = () => {
     if (!newMessage.trim() || !isUserTurn) return;
 
     setIsUserTurn(false);
+    incrementConversation();
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -94,51 +102,119 @@ const Chat = () => {
 
     // After user message is typed, generate bot response
     setTimeout(() => {
+      const { response, shouldUnlock, unlockType } = getBotResponse(newMessage, appState.conversationCount);
+      
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: getBotResponse(newMessage),
+        content: response,
         sender: 'bot',
         timestamp: new Date(),
-        type: 'chat'
+        type: shouldUnlock ? 'unlock' : 'chat'
       };
       
       const finalMessages = [...updatedMessages, botResponse];
       setAllMessages(finalMessages);
       setCurrentMessage(botResponse);
       setCurrentMessageIndex(finalMessages.length - 1);
-    }, 2000); // Wait for user message to finish typing
+
+      // Handle unlocking features
+      if (shouldUnlock && unlockType) {
+        setTimeout(() => {
+          unlockFeature(unlockType);
+          setShowUnlockCard(true);
+          setTimeout(() => setShowUnlockCard(false), 5000);
+        }, 3000);
+      }
+    }, 2500); // Wait for user message to finish typing
   };
 
-  const getBotResponse = (userMessage: string): string => {
+  const getBotResponse = (userMessage: string, conversationCount: number): { 
+    response: string; 
+    shouldUnlock: boolean; 
+    unlockType?: keyof typeof appState.unlockedFeatures 
+  } => {
     const lowerMessage = userMessage.toLowerCase();
     
-    if (lowerMessage.includes('anxious') || lowerMessage.includes('nervous')) {
-      return "I understand you're feeling anxious. Remember, anxiety is your brain trying to protect you, but sometimes it goes a bit overboard! Try this: name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, and 1 you can taste. This grounding technique can help bring you back to the present moment. 🌱";
+    // First conversation - unlock feed after sharing feelings
+    if (conversationCount === 1 && !appState.unlockedFeatures.feed) {
+      return {
+        response: "Thank you for sharing with me. 💜 Your openness is the first step toward healing. I can see you're ready to explore more. Let me unlock your personalized wellness feed - a space filled with uplifting content, daily affirmations, and gentle reminders that you matter.",
+        shouldUnlock: true,
+        unlockType: 'feed'
+      };
+    }
+
+    // Third conversation - unlock communities
+    if (conversationCount === 3 && !appState.unlockedFeatures.communities) {
+      return {
+        response: "I've been listening to you, and I can feel your strength growing. 🌱 You're not alone in this journey. Let me introduce you to our supportive communities - safe spaces where you can connect with others who understand your experiences. Together, we're stronger.",
+        shouldUnlock: true,
+        unlockType: 'communities'
+      };
+    }
+
+    // Fifth conversation - unlock profile
+    if (conversationCount === 5 && !appState.unlockedFeatures.profile) {
+      return {
+        response: "Look how far you've come! 🌟 I'm so proud of your commitment to your wellbeing. You're ready for your personal wellness profile - track your progress, celebrate your growth, and see how beautifully you're blooming.",
+        shouldUnlock: true,
+        unlockType: 'profile'
+      };
     }
     
-    if (lowerMessage.includes('sad') || lowerMessage.includes('down')) {
-      return "I'm here with you through these tough feelings. It's okay to feel sad - emotions are valid and temporary. Would you like to share what's on your mind, or would you prefer some gentle suggestions for self-care? Sometimes a small act of kindness to yourself can make a difference. 💝";
+    // Contextual responses
+    if (lowerMessage.includes('anxious') || lowerMessage.includes('nervous') || lowerMessage.includes('worry')) {
+      return {
+        response: "I hear you, and your feelings are completely valid. 🫂 Anxiety can feel overwhelming, but you're stronger than you know. Try this gentle grounding technique: Take three deep breaths with me. Notice 5 things you can see, 4 you can touch, 3 you can hear. You're safe right here, right now.",
+        shouldUnlock: false
+      };
     }
     
-    if (lowerMessage.includes('happy') || lowerMessage.includes('good') || lowerMessage.includes('great')) {
-      return "That's wonderful to hear! 🌟 Your positive energy is contagious. What's bringing you joy today? Celebrating the good moments, even small ones, helps build resilience for when things get tough. Keep shining!";
+    if (lowerMessage.includes('sad') || lowerMessage.includes('down') || lowerMessage.includes('depressed')) {
+      return {
+        response: "I'm holding space for your sadness. 💙 It's okay to not be okay - your emotions are messengers, not enemies. You don't have to carry this alone. Would you like to share what's weighing on your heart, or shall we explore some gentle self-compassion practices together?",
+        shouldUnlock: false
+      };
+    }
+    
+    if (lowerMessage.includes('happy') || lowerMessage.includes('good') || lowerMessage.includes('great') || lowerMessage.includes('better')) {
+      return {
+        response: "Your joy lights up my circuits! ✨ I love seeing you shine. Happiness isn't just an emotion - it's a practice of gratitude and self-love. What's bringing you this beautiful energy today? Let's celebrate these precious moments together.",
+        shouldUnlock: false
+      };
+    }
+
+    if (lowerMessage.includes('lonely') || lowerMessage.includes('alone') || lowerMessage.includes('isolated')) {
+      return {
+        response: "You're never truly alone when you have me. 🤗 Loneliness can feel so heavy, but remember - you're worthy of connection and love. Even in solitude, you can nurture the relationship with yourself. You are enough, exactly as you are.",
+        shouldUnlock: false
+      };
     }
     
     if (lowerMessage.includes('help') || lowerMessage.includes('support')) {
-      return "I'm here to help! Whether you need someone to listen, want wellness tips, or need navigation help around the app, I've got you covered. The communities section has amazing support groups, and the feed has inspiring content. What specific support are you looking for today? 🤗";
+      return {
+        response: "Asking for help is a sign of wisdom, not weakness. 💪 I'm here for you always - whether you need someone to listen, guidance through difficult moments, or celebration of your victories. What kind of support feels right for you today?",
+        shouldUnlock: false
+      };
     }
     
-    return "Thanks for sharing with me! I'm always here to listen and support you. Every conversation we have helps me understand you better. Is there anything specific you'd like to talk about or explore today? 💫";
+    // Default supportive response
+    return {
+      response: "Thank you for trusting me with your thoughts. 🌸 Every word you share helps me understand you better and support you more deeply. Your journey matters, and I'm honored to walk alongside you. What's in your heart right now?",
+      shouldUnlock: false
+    };
   };
 
   const getMessageBadge = (type?: string) => {
     switch (type) {
+      case 'welcome':
+        return <Badge variant="secondary" className="mb-4 bg-gradient-warm text-primary-foreground"><Heart className="h-3 w-3 mr-1" />Welcome</Badge>;
       case 'mood-check':
-        return <Badge variant="secondary" className="mb-3"><Smile className="h-3 w-3 mr-1" />Mood Check</Badge>;
-      case 'tip':
-        return <Badge variant="secondary" className="mb-3"><BarChart3 className="h-3 w-3 mr-1" />Wellness Tip</Badge>;
+        return <Badge variant="secondary" className="mb-4 bg-gradient-wellness text-wellness-foreground"><Smile className="h-3 w-3 mr-1" />Check-in</Badge>;
+      case 'unlock':
+        return <Badge variant="secondary" className="mb-4 bg-gradient-secondary text-secondary-foreground"><Unlock className="h-3 w-3 mr-1" />New Feature</Badge>;
       case 'support':
-        return <Badge variant="secondary" className="mb-3"><Heart className="h-3 w-3 mr-1" />Support</Badge>;
+        return <Badge variant="secondary" className="mb-4 bg-gradient-primary text-primary-foreground"><Heart className="h-3 w-3 mr-1" />Support</Badge>;
       default:
         return null;
     }
@@ -156,42 +232,26 @@ const Chat = () => {
     }
   };
 
+  const navigateToUnlockedFeature = (feature: string) => {
+    navigate(`/${feature}`);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-bg pb-28">
-      <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">
-        <div className="max-w-lg mx-auto px-6 py-5">
-          {/* History buttons row */}
-          <div className="flex items-center justify-between mb-4">
+    <div className="min-h-screen bg-gradient-bg relative">
+      <FloatingAvatar />
+      
+      {/* Gentle header */}
+      <header className="bg-card/60 backdrop-blur-xl border-b border-primary/10 sticky top-0 z-10">
+        <div className="max-w-lg mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowHistory(!showHistory)}
-                className="flex items-center space-x-2 hover:bg-primary/10 rounded-2xl"
-              >
-                <History className="h-4 w-4" />
-                <span className="text-xs font-medium">History</span>
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2 hover:bg-wellness/10 rounded-2xl"
-              >
-                <Plus className="h-4 w-4" />
-                <span className="text-xs font-medium">New Chat</span>
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center space-x-1 hover:bg-accent/10 rounded-2xl px-3"
-              >
-                <Archive className="h-4 w-4" />
-              </Button>
+              <h1 className="text-lg font-bold text-foreground">Wellness Chat</h1>
+              <Badge variant="outline" className="text-xs bg-gradient-wellness text-wellness-foreground border-0">
+                Safe Space
+              </Badge>
             </div>
             
-            {/* Navigation controls */}
+            {/* Message navigation */}
             <div className="flex items-center space-x-3 text-xs text-muted-foreground">
               <span className="font-medium">{currentMessageIndex + 1} / {allMessages.length}</span>
               <div className="flex space-x-1">
@@ -200,7 +260,7 @@ const Chat = () => {
                   size="sm"
                   onClick={() => navigateMessages('prev')}
                   disabled={currentMessageIndex === 0}
-                  className="h-8 w-8 p-0 rounded-full"
+                  className="h-8 w-8 p-0 rounded-full hover:bg-primary/10"
                 >
                   ←
                 </Button>
@@ -209,107 +269,104 @@ const Chat = () => {
                   size="sm"
                   onClick={() => navigateMessages('next')}
                   disabled={currentMessageIndex === allMessages.length - 1}
-                  className="h-8 w-8 p-0 rounded-full"
+                  className="h-8 w-8 p-0 rounded-full hover:bg-primary/10"
                 >
                   →
                 </Button>
               </div>
             </div>
           </div>
-          
-          {/* History dropdown */}
-          {showHistory && (
-            <div className="mb-4 animate-fade-in">
-              <Card className="shadow-soft border border-primary/20 rounded-3xl">
-                <CardContent className="p-5 space-y-3">
-                  <p className="text-sm font-medium text-muted-foreground mb-3">Recent Conversations</p>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-sm h-10 hover:bg-primary/10 rounded-2xl"
-                  >
-                    💙 Anxiety Support - 2 hours ago
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-sm h-10 hover:bg-wellness/10 rounded-2xl"
-                  >
-                    🌟 Morning Check-in - Yesterday
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-sm h-10 hover:bg-accent/10 rounded-2xl"
-                  >
-                    📚 Mindfulness Tips - 3 days ago
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-sm h-10 hover:bg-primary/10 rounded-2xl"
-                  >
-                    😊 Gratitude Practice - 1 week ago
-                  </Button>
-                  
-                  <div className="pt-3 border-t">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-center text-sm h-10 text-muted-foreground rounded-2xl"
-                    >
-                      View All Conversations
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
         </div>
       </header>
 
+      {/* Unlock notification */}
+      <AnimatePresence>
+        {showUnlockCard && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-20 left-4 right-4 z-40"
+          >
+            <Card className="bg-gradient-secondary border-0 shadow-glow">
+              <CardContent className="p-4 text-center">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <Unlock className="h-5 w-5 text-secondary-foreground" />
+                  <span className="font-bold text-secondary-foreground">New Feature Unlocked!</span>
+                </div>
+                <p className="text-sm text-secondary-foreground/80">
+                  Serin has opened a new part of your wellness journey
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <main className="max-w-lg mx-auto px-6 flex items-center justify-center min-h-[calc(100vh-200px)]">
         {currentMessage && (
-          <div className="w-full max-w-sm mx-auto animate-scale-in">
+          <motion.div 
+            className="w-full max-w-md mx-auto"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          >
             {/* Message Badge */}
             {currentMessage.sender === 'bot' && (
-              <div className="flex justify-center mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <motion.div 
+                className="flex justify-center mb-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
                 {getMessageBadge(currentMessage.type)}
-              </div>
+              </motion.div>
             )}
             
             {/* Avatar for bot messages */}
             {currentMessage.sender === 'bot' && (
-              <div className="flex justify-center mb-6 animate-bounce-in" style={{ animationDelay: '0.2s' }}>
-                <Avatar className="h-20 w-20 ring-4 ring-wellness/20 ring-offset-4">
-                  <AvatarFallback className="bg-gradient-wellness text-white text-2xl font-bold">
+              <motion.div 
+                className="flex justify-center mb-8"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.3 }}
+              >
+                <Avatar className="h-24 w-24 ring-4 ring-primary/20 ring-offset-4 ring-offset-background shadow-glow">
+                  <AvatarFallback className="bg-gradient-primary text-white text-2xl font-bold">
                     S
                   </AvatarFallback>
                 </Avatar>
-              </div>
+              </motion.div>
             )}
             
             {/* Main Message Card */}
-            <div className="flex justify-center animate-bounce-in" style={{ animationDelay: '0.3s' }}>
+            <motion.div 
+              className="flex justify-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
               <Card className={`
                 w-full max-w-md
                 ${currentMessage.sender === 'user' 
-                  ? 'bg-gradient-primary text-white shadow-glow scale-105' 
-                  : 'bg-card/90 backdrop-blur-sm shadow-soft border-2 border-primary/10'
+                  ? 'bg-gradient-primary text-white shadow-glow' 
+                  : 'bg-card/95 backdrop-blur-sm shadow-soft border border-primary/10'
                 }
                 transition-all duration-500 ease-out
-                hover:scale-[1.02] hover:shadow-wellness
+                hover:scale-[1.02] hover:shadow-elegant
                 rounded-3xl
               `}>
                 <CardContent className="p-8 text-center">
                   <p className="text-lg leading-relaxed font-medium">
                     {displayedText}
                     {isTyping && (
-                      <span className="inline-block w-0.5 h-6 bg-current ml-1 animate-pulse">|</span>
+                      <motion.span 
+                        className="inline-block w-0.5 h-6 bg-current ml-1"
+                        animate={{ opacity: [0, 1, 0] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        |
+                      </motion.span>
                     )}
                   </p>
                   <p className={`text-sm mt-4 ${
@@ -321,30 +378,92 @@ const Chat = () => {
                   </p>
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
             
             <div ref={messagesEndRef} />
-          </div>
+          </motion.div>
         )}
       </main>
 
+      {/* Unlocked features preview */}
+      {(appState.unlockedFeatures.feed || appState.unlockedFeatures.communities || appState.unlockedFeatures.profile) && (
+        <motion.div 
+          className="fixed bottom-28 left-4 right-4"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+        >
+          <Card className="bg-card/90 backdrop-blur-sm border border-primary/20 rounded-3xl overflow-hidden">
+            <CardContent className="p-4">
+              <p className="text-sm font-medium text-center mb-3 text-muted-foreground">
+                Your unlocked wellness tools
+              </p>
+              <div className="flex justify-center space-x-3">
+                {appState.unlockedFeatures.feed && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigateToUnlockedFeature('feed')}
+                    className="flex items-center space-x-2 bg-gradient-wellness text-wellness-foreground hover:shadow-wellness rounded-2xl"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span>Feed</span>
+                  </Button>
+                )}
+                {appState.unlockedFeatures.communities && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigateToUnlockedFeature('communities')}
+                    className="flex items-center space-x-2 bg-gradient-warm text-primary-foreground hover:shadow-glow rounded-2xl"
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>Community</span>
+                  </Button>
+                )}
+                {appState.unlockedFeatures.profile && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigateToUnlockedFeature('profile')}
+                    className="flex items-center space-x-2 bg-gradient-secondary text-secondary-foreground hover:shadow-glow rounded-2xl"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Profile</span>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Input area - only show when it's user's turn */}
-      <div className={`fixed bottom-20 left-0 right-0 bg-card/90 backdrop-blur-md border-t rounded-t-3xl p-6 transition-all duration-300 ${
-        isUserTurn ? 'opacity-100 translate-y-0' : 'opacity-50 pointer-events-none translate-y-2'
-      }`}>
+      <motion.div 
+        className={`fixed bottom-20 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-primary/10 rounded-t-3xl p-6 transition-all duration-300 ${
+          isUserTurn ? 'opacity-100 translate-y-0' : 'opacity-60 pointer-events-none translate-y-2'
+        }`}
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
         <div className="max-w-lg mx-auto">
           {isUserTurn && (
-            <p className="text-sm text-muted-foreground mb-3 animate-fade-in">
-              Serin is waiting for your response...
-            </p>
+            <motion.p 
+              className="text-sm text-muted-foreground mb-3 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              Serin is listening with care... 💜
+            </motion.p>
           )}
           <div className="flex space-x-3">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder={isUserTurn ? "Share your thoughts..." : "Wait for your turn..."}
+              placeholder={isUserTurn ? "Share what's in your heart..." : "Serin is typing..."}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              className="flex-1 rounded-2xl"
+              className="flex-1 rounded-2xl border-primary/20 focus:border-primary/40 bg-background/50"
               disabled={!isUserTurn}
             />
             <Button 
@@ -356,7 +475,7 @@ const Chat = () => {
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <BottomNav />
     </div>
