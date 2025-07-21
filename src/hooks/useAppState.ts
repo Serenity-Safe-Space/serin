@@ -1,23 +1,41 @@
 import { useState, useEffect } from 'react';
 
 interface AppState {
-  unlockedFeatures: {
+  availableFeatures: {
     feed: boolean;
     communities: boolean;
     profile: boolean;
   };
   conversationCount: number;
   hasCompletedWelcome: boolean;
+  emotionalReadiness: {
+    forCommunity: boolean;
+    forSharing: boolean;
+    forProgress: boolean;
+  };
+  pendingRecommendations: Array<{
+    id: string;
+    type: 'feed' | 'communities' | 'profile' | 'content';
+    title: string;
+    description: string;
+    timestamp: Date;
+  }>;
 }
 
 const DEFAULT_STATE: AppState = {
-  unlockedFeatures: {
+  availableFeatures: {
     feed: false,
     communities: false,
     profile: false,
   },
   conversationCount: 0,
   hasCompletedWelcome: false,
+  emotionalReadiness: {
+    forCommunity: false,
+    forSharing: false,
+    forProgress: false,
+  },
+  pendingRecommendations: [],
 };
 
 export const useAppState = () => {
@@ -30,12 +48,43 @@ export const useAppState = () => {
     localStorage.setItem('serinAppState', JSON.stringify(appState));
   }, [appState]);
 
-  const unlockFeature = (feature: keyof AppState['unlockedFeatures']) => {
+  const enableFeature = (feature: keyof AppState['availableFeatures']) => {
     setAppState(prev => ({
       ...prev,
-      unlockedFeatures: {
-        ...prev.unlockedFeatures,
+      availableFeatures: {
+        ...prev.availableFeatures,
         [feature]: true,
+      },
+    }));
+  };
+
+  const addRecommendation = (recommendation: Omit<AppState['pendingRecommendations'][0], 'id' | 'timestamp'>) => {
+    setAppState(prev => ({
+      ...prev,
+      pendingRecommendations: [
+        ...prev.pendingRecommendations,
+        {
+          ...recommendation,
+          id: Date.now().toString(),
+          timestamp: new Date(),
+        }
+      ],
+    }));
+  };
+
+  const removeRecommendation = (id: string) => {
+    setAppState(prev => ({
+      ...prev,
+      pendingRecommendations: prev.pendingRecommendations.filter(r => r.id !== id),
+    }));
+  };
+
+  const updateEmotionalReadiness = (aspect: keyof AppState['emotionalReadiness'], ready: boolean) => {
+    setAppState(prev => ({
+      ...prev,
+      emotionalReadiness: {
+        ...prev.emotionalReadiness,
+        [aspect]: ready,
       },
     }));
   };
@@ -60,7 +109,10 @@ export const useAppState = () => {
 
   return {
     appState,
-    unlockFeature,
+    enableFeature,
+    addRecommendation,
+    removeRecommendation,
+    updateEmotionalReadiness,
     incrementConversation,
     completeWelcome,
     resetApp,

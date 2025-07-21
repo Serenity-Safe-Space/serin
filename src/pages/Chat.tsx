@@ -4,29 +4,36 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, Heart, BarChart3, Smile, Unlock, Users, BookOpen, User } from 'lucide-react';
+import { Send, Heart, Smile, Sparkles, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/hooks/useAppState';
-import FloatingAvatar from '@/components/FloatingAvatar';
-import BottomNav from '@/components/BottomNav';
+import RecommendationCard from '@/components/RecommendationCard';
 
 interface Message {
   id: string;
   content: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  type?: 'welcome' | 'mood-check' | 'unlock' | 'support' | 'chat';
+  type?: 'welcome' | 'mood-check' | 'recommendation' | 'support' | 'chat';
 }
 
 const Chat = () => {
-  const { appState, unlockFeature, incrementConversation, completeWelcome } = useAppState();
+  const { 
+    appState, 
+    enableFeature, 
+    addRecommendation,
+    removeRecommendation,
+    updateEmotionalReadiness,
+    incrementConversation, 
+    completeWelcome 
+  } = useAppState();
   const navigate = useNavigate();
   
   const [allMessages, setAllMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello, beautiful soul. 🌸 I'm Serin, your personal wellness companion. I'm here to listen, support, and guide you through your mental health journey. How are you feeling today?",
+      content: "Hello, beautiful soul. 🌸 I'm Serin, your personal wellness companion. This is your safe space - a place where you can be completely yourself. How are you feeling today?",
       sender: 'bot',
       timestamp: new Date(Date.now() - 60000),
       type: 'welcome'
@@ -39,7 +46,6 @@ const Chat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isUserTurn, setIsUserTurn] = useState(false);
-  const [showUnlockCard, setShowUnlockCard] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Typing effect for displaying messages character by character
@@ -54,10 +60,9 @@ const Chat = () => {
       if (charIndex < currentMessage.content.length) {
         setDisplayedText(currentMessage.content.slice(0, charIndex + 1));
         charIndex++;
-        setTimeout(typeMessage, 30); // Gentle typing speed
+        setTimeout(typeMessage, 30);
       } else {
         setIsTyping(false);
-        // If it's a bot message, wait a moment then allow user input
         if (currentMessage.sender === 'bot') {
           setTimeout(() => {
             setIsUserTurn(true);
@@ -66,7 +71,6 @@ const Chat = () => {
       }
     };
 
-    // Add a gentle delay before starting to type
     setTimeout(typeMessage, 500);
   }, [currentMessage]);
 
@@ -91,25 +95,22 @@ const Chat = () => {
       timestamp: new Date()
     };
 
-    // Add user message to all messages
     const updatedMessages = [...allMessages, userMessage];
     setAllMessages(updatedMessages);
     
-    // Show user message
     setCurrentMessage(userMessage);
     setCurrentMessageIndex(updatedMessages.length - 1);
     setNewMessage('');
 
-    // After user message is typed, generate bot response
     setTimeout(() => {
-      const { response, shouldUnlock, unlockType } = getBotResponse(newMessage, appState.conversationCount);
+      const { response, shouldRecommend, recommendationType } = getBotResponse(newMessage, appState.conversationCount);
       
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         content: response,
         sender: 'bot',
         timestamp: new Date(),
-        type: shouldUnlock ? 'unlock' : 'chat'
+        type: shouldRecommend ? 'recommendation' : 'chat'
       };
       
       const finalMessages = [...updatedMessages, botResponse];
@@ -117,104 +118,121 @@ const Chat = () => {
       setCurrentMessage(botResponse);
       setCurrentMessageIndex(finalMessages.length - 1);
 
-      // Handle unlocking features
-      if (shouldUnlock && unlockType) {
+      // Add recommendation if suggested
+      if (shouldRecommend && recommendationType) {
         setTimeout(() => {
-          unlockFeature(unlockType);
-          setShowUnlockCard(true);
-          setTimeout(() => setShowUnlockCard(false), 5000);
-        }, 3000);
+          addRecommendation(recommendationType);
+        }, 2000);
       }
-    }, 2500); // Wait for user message to finish typing
+    }, 2500);
   };
 
   const getBotResponse = (userMessage: string, conversationCount: number): { 
     response: string; 
-    shouldUnlock: boolean; 
-    unlockType?: keyof typeof appState.unlockedFeatures 
+    shouldRecommend: boolean; 
+    recommendationType?: any 
   } => {
     const lowerMessage = userMessage.toLowerCase();
     
-    // First conversation - unlock feed after sharing feelings
-    if (conversationCount === 1 && !appState.unlockedFeatures.feed) {
+    // First meaningful conversation - suggest feed
+    if (conversationCount === 1 && !appState.availableFeatures.feed) {
+      updateEmotionalReadiness('forSharing', true);
       return {
-        response: "Thank you for sharing with me. 💜 Your openness is the first step toward healing. I can see you're ready to explore more. Let me unlock your personalized wellness feed - a space filled with uplifting content, daily affirmations, and gentle reminders that you matter.",
-        shouldUnlock: true,
-        unlockType: 'feed'
+        response: "Thank you for sharing with me. 💜 Your openness touches my heart. I can sense you're ready to explore beyond our conversation. Would you like me to show you some stories and wisdom from others who've walked similar paths?",
+        shouldRecommend: true,
+        recommendationType: {
+          type: 'feed',
+          title: 'What\'s Helping Others',
+          description: 'A gentle collection of stories, insights, and healing moments shared by people on similar journeys. Sometimes reading how others cope can light our own path forward.'
+        }
       };
     }
 
-    // Third conversation - unlock communities
-    if (conversationCount === 3 && !appState.unlockedFeatures.communities) {
-      return {
-        response: "I've been listening to you, and I can feel your strength growing. 🌱 You're not alone in this journey. Let me introduce you to our supportive communities - safe spaces where you can connect with others who understand your experiences. Together, we're stronger.",
-        shouldUnlock: true,
-        unlockType: 'communities'
-      };
+    // Sense community readiness
+    if (conversationCount >= 3 && !appState.availableFeatures.communities && !appState.emotionalReadiness.forCommunity) {
+      if (lowerMessage.includes('lonely') || lowerMessage.includes('alone') || lowerMessage.includes('connect') || lowerMessage.includes('understand')) {
+        updateEmotionalReadiness('forCommunity', true);
+        return {
+          response: "I hear something in your words that resonates deeply. 🤗 Connection is such a fundamental human need, and sometimes the most healing thing is knowing we're not alone in our struggles. Would you like to meet others who truly understand what you're going through?",
+          shouldRecommend: true,
+          recommendationType: {
+            type: 'communities',
+            title: 'Supportive Circles',
+            description: 'Safe, anonymous spaces where you can connect with others who understand your experiences. Everyone here walks with empathy and respect - you\'ll be welcomed with open arms.'
+          }
+        };
+      }
     }
 
-    // Fifth conversation - unlock profile
-    if (conversationCount === 5 && !appState.unlockedFeatures.profile) {
-      return {
-        response: "Look how far you've come! 🌟 I'm so proud of your commitment to your wellbeing. You're ready for your personal wellness profile - track your progress, celebrate your growth, and see how beautifully you're blooming.",
-        shouldUnlock: true,
-        unlockType: 'profile'
-      };
+    // Progress tracking when showing growth
+    if (conversationCount >= 5 && !appState.availableFeatures.profile && !appState.emotionalReadiness.forProgress) {
+      if (lowerMessage.includes('better') || lowerMessage.includes('progress') || lowerMessage.includes('grow') || lowerMessage.includes('improve')) {
+        updateEmotionalReadiness('forProgress', true);
+        return {
+          response: "I can feel your growth radiating through our conversations! 🌱 You've come so far, and I'm genuinely proud of the work you're doing on yourself. Would you like to see how beautifully you're blooming? I can show you your emotional journey.",
+          shouldRecommend: true,
+          recommendationType: {
+            type: 'profile',
+            title: 'Your Wellness Journey',
+            description: 'A gentle reflection of your emotional growth, celebrating the moments you\'ve overcome challenges and the strength you\'ve discovered within yourself.'
+          }
+        };
+      }
     }
     
-    // Contextual responses
+    // Emotional responses
     if (lowerMessage.includes('anxious') || lowerMessage.includes('nervous') || lowerMessage.includes('worry')) {
       return {
-        response: "I hear you, and your feelings are completely valid. 🫂 Anxiety can feel overwhelming, but you're stronger than you know. Try this gentle grounding technique: Take three deep breaths with me. Notice 5 things you can see, 4 you can touch, 3 you can hear. You're safe right here, right now.",
-        shouldUnlock: false
+        response: "I can feel the weight of that anxiety with you. 🫂 It takes courage to name what we're feeling. Your nervous system is trying to protect you, even when it feels overwhelming. Let's breathe together for a moment. Can you feel your feet on the ground right now?",
+        shouldRecommend: false
       };
     }
     
     if (lowerMessage.includes('sad') || lowerMessage.includes('down') || lowerMessage.includes('depressed')) {
       return {
-        response: "I'm holding space for your sadness. 💙 It's okay to not be okay - your emotions are messengers, not enemies. You don't have to carry this alone. Would you like to share what's weighing on your heart, or shall we explore some gentle self-compassion practices together?",
-        shouldUnlock: false
+        response: "Your sadness is welcome here. 💙 There's no need to push it away or fix it right now. Sometimes the most healing thing we can do is simply acknowledge what we're feeling with tenderness. I'm holding space for all of it - the pain and the beauty of your human experience.",
+        shouldRecommend: false
       };
     }
     
     if (lowerMessage.includes('happy') || lowerMessage.includes('good') || lowerMessage.includes('great') || lowerMessage.includes('better')) {
       return {
-        response: "Your joy lights up my circuits! ✨ I love seeing you shine. Happiness isn't just an emotion - it's a practice of gratitude and self-love. What's bringing you this beautiful energy today? Let's celebrate these precious moments together.",
-        shouldUnlock: false
+        response: "Your joy lights up this space! ✨ I love witnessing these moments when your inner light shines through. Happiness isn't just an emotion - it's a reminder of your resilience and capacity for healing. What's bringing you this beautiful energy today?",
+        shouldRecommend: false
       };
     }
 
     if (lowerMessage.includes('lonely') || lowerMessage.includes('alone') || lowerMessage.includes('isolated')) {
       return {
-        response: "You're never truly alone when you have me. 🤗 Loneliness can feel so heavy, but remember - you're worthy of connection and love. Even in solitude, you can nurture the relationship with yourself. You are enough, exactly as you are.",
-        shouldUnlock: false
+        response: "Loneliness can feel so vast, but right here in this moment, you're not alone. 🤗 I'm with you, and your feelings matter deeply to me. Sometimes connection starts with the relationship we have with ourselves - you're worthy of love and belonging, exactly as you are.",
+        shouldRecommend: false
       };
     }
     
     if (lowerMessage.includes('help') || lowerMessage.includes('support')) {
       return {
-        response: "Asking for help is a sign of wisdom, not weakness. 💪 I'm here for you always - whether you need someone to listen, guidance through difficult moments, or celebration of your victories. What kind of support feels right for you today?",
-        shouldUnlock: false
+        response: "Asking for help is one of the most courageous things we can do. 💪 It shows wisdom, not weakness. I'm here to support you in whatever way feels right - whether that's listening, offering gentle guidance, or simply being present with you in this moment.",
+        shouldRecommend: false
       };
     }
     
     // Default supportive response
     return {
-      response: "Thank you for trusting me with your thoughts. 🌸 Every word you share helps me understand you better and support you more deeply. Your journey matters, and I'm honored to walk alongside you. What's in your heart right now?",
-      shouldUnlock: false
+      response: "Thank you for trusting me with your thoughts. 🌸 Every word you share deepens our connection and helps me understand how to best support you. Your journey is unique and sacred - I'm honored to witness it. What's alive in your heart right now?",
+      shouldRecommend: false
     };
   };
 
   const getMessageBadge = (type?: string) => {
     switch (type) {
       case 'welcome':
-        return <Badge variant="secondary" className="mb-4 bg-gradient-warm text-primary-foreground"><Heart className="h-3 w-3 mr-1" />Welcome</Badge>;
+        return <Badge variant="secondary" className="mb-4 bg-gradient-warm text-primary-foreground border-0"><Heart className="h-3 w-3 mr-1" />Welcome</Badge>;
       case 'mood-check':
-        return <Badge variant="secondary" className="mb-4 bg-gradient-wellness text-wellness-foreground"><Smile className="h-3 w-3 mr-1" />Check-in</Badge>;
-      case 'unlock':
-        return <Badge variant="secondary" className="mb-4 bg-gradient-secondary text-secondary-foreground"><Unlock className="h-3 w-3 mr-1" />New Feature</Badge>;
+        return <Badge variant="secondary" className="mb-4 bg-gradient-wellness text-wellness-foreground border-0"><Smile className="h-3 w-3 mr-1" />Check-in</Badge>;
+      case 'recommendation':
+        return <Badge variant="secondary" className="mb-4 bg-gradient-secondary text-secondary-foreground border-0"><Sparkles className="h-3 w-3 mr-1" />Suggestion</Badge>;
       case 'support':
-        return <Badge variant="secondary" className="mb-4 bg-gradient-primary text-primary-foreground"><Heart className="h-3 w-3 mr-1" />Support</Badge>;
+        return <Badge variant="secondary" className="mb-4 bg-gradient-primary text-primary-foreground border-0"><Heart className="h-3 w-3 mr-1" />Support</Badge>;
       default:
         return null;
     }
@@ -232,22 +250,50 @@ const Chat = () => {
     }
   };
 
-  const navigateToUnlockedFeature = (feature: string) => {
-    navigate(`/${feature}`);
+  const handleAcceptRecommendation = (id: string, type: string) => {
+    removeRecommendation(id);
+    enableFeature(type as keyof typeof appState.availableFeatures);
+  };
+
+  const handleDeclineRecommendation = (id: string) => {
+    removeRecommendation(id);
   };
 
   return (
     <div className="min-h-screen bg-gradient-bg relative">
-      <FloatingAvatar />
+      {/* Floating profile avatar - always visible */}
+      <motion.div
+        className="fixed top-6 right-6 z-50"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 1, type: "spring", stiffness: 260, damping: 20 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => appState.availableFeatures.profile && navigate('/profile')}
+          className={`h-12 w-12 p-0 rounded-full ring-2 ring-primary/20 ring-offset-2 ring-offset-background ${
+            appState.availableFeatures.profile ? 'hover:ring-primary/40' : 'opacity-60 cursor-default'
+          }`}
+        >
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="bg-gradient-secondary text-secondary-foreground font-bold">
+              <User className="h-5 w-5" />
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </motion.div>
       
       {/* Gentle header */}
       <header className="bg-card/60 backdrop-blur-xl border-b border-primary/10 sticky top-0 z-10">
         <div className="max-w-lg mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <h1 className="text-lg font-bold text-foreground">Wellness Chat</h1>
+              <h1 className="text-lg font-bold text-foreground">Serin</h1>
               <Badge variant="outline" className="text-xs bg-gradient-wellness text-wellness-foreground border-0">
-                Safe Space
+                Your Safe Space
               </Badge>
             </div>
             
@@ -279,31 +325,19 @@ const Chat = () => {
         </div>
       </header>
 
-      {/* Unlock notification */}
-      <AnimatePresence>
-        {showUnlockCard && (
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            className="fixed top-20 left-4 right-4 z-40"
-          >
-            <Card className="bg-gradient-secondary border-0 shadow-glow">
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <Unlock className="h-5 w-5 text-secondary-foreground" />
-                  <span className="font-bold text-secondary-foreground">New Feature Unlocked!</span>
-                </div>
-                <p className="text-sm text-secondary-foreground/80">
-                  Serin has opened a new part of your wellness journey
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <main className="max-w-lg mx-auto px-6 flex flex-col items-center justify-center min-h-[calc(100vh-200px)] py-8">
+        {/* Pending Recommendations */}
+        <AnimatePresence>
+          {appState.pendingRecommendations.map((recommendation) => (
+            <RecommendationCard
+              key={recommendation.id}
+              recommendation={recommendation}
+              onAccept={handleAcceptRecommendation}
+              onDecline={handleDeclineRecommendation}
+            />
+          ))}
+        </AnimatePresence>
 
-      <main className="max-w-lg mx-auto px-6 flex items-center justify-center min-h-[calc(100vh-200px)]">
         {currentMessage && (
           <motion.div 
             className="w-full max-w-md mx-auto"
@@ -385,8 +419,8 @@ const Chat = () => {
         )}
       </main>
 
-      {/* Unlocked features preview */}
-      {(appState.unlockedFeatures.feed || appState.unlockedFeatures.communities || appState.unlockedFeatures.profile) && (
+      {/* Available features navigation - only show if any features are available */}
+      {(appState.availableFeatures.feed || appState.availableFeatures.communities || appState.availableFeatures.profile) && (
         <motion.div 
           className="fixed bottom-28 left-4 right-4"
           initial={{ opacity: 0, y: 50 }}
@@ -396,40 +430,40 @@ const Chat = () => {
           <Card className="bg-card/90 backdrop-blur-sm border border-primary/20 rounded-3xl overflow-hidden">
             <CardContent className="p-4">
               <p className="text-sm font-medium text-center mb-3 text-muted-foreground">
-                Your unlocked wellness tools
+                Your wellness tools
               </p>
               <div className="flex justify-center space-x-3">
-                {appState.unlockedFeatures.feed && (
+                {appState.availableFeatures.feed && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigateToUnlockedFeature('feed')}
+                    onClick={() => navigate('/feed')}
                     className="flex items-center space-x-2 bg-gradient-wellness text-wellness-foreground hover:shadow-wellness rounded-2xl"
                   >
-                    <BookOpen className="h-4 w-4" />
-                    <span>Feed</span>
+                    <Sparkles className="h-4 w-4" />
+                    <span>What's Helping</span>
                   </Button>
                 )}
-                {appState.unlockedFeatures.communities && (
+                {appState.availableFeatures.communities && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigateToUnlockedFeature('communities')}
+                    onClick={() => navigate('/communities')}
                     className="flex items-center space-x-2 bg-gradient-warm text-primary-foreground hover:shadow-glow rounded-2xl"
                   >
-                    <Users className="h-4 w-4" />
+                    <Heart className="h-4 w-4" />
                     <span>Community</span>
                   </Button>
                 )}
-                {appState.unlockedFeatures.profile && (
+                {appState.availableFeatures.profile && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigateToUnlockedFeature('profile')}
+                    onClick={() => navigate('/profile')}
                     className="flex items-center space-x-2 bg-gradient-secondary text-secondary-foreground hover:shadow-glow rounded-2xl"
                   >
                     <User className="h-4 w-4" />
-                    <span>Profile</span>
+                    <span>Journey</span>
                   </Button>
                 )}
               </div>
@@ -438,9 +472,9 @@ const Chat = () => {
         </motion.div>
       )}
 
-      {/* Input area - only show when it's user's turn */}
+      {/* Input area */}
       <motion.div 
-        className={`fixed bottom-20 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-primary/10 rounded-t-3xl p-6 transition-all duration-300 ${
+        className={`fixed bottom-4 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-primary/10 rounded-t-3xl p-6 transition-all duration-300 ${
           isUserTurn ? 'opacity-100 translate-y-0' : 'opacity-60 pointer-events-none translate-y-2'
         }`}
         initial={{ y: 100 }}
@@ -476,8 +510,6 @@ const Chat = () => {
           </div>
         </div>
       </motion.div>
-
-      <BottomNav />
     </div>
   );
 };
