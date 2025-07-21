@@ -498,55 +498,116 @@ const Chat = () => {
           </motion.div>
         </div>
       ) : (
-        /* Chat Interface */
+        /* Chat Interface - Keep the big emoji and show messages with pop animation */
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8">
-          {/* Chat messages area - condensed and elegant */}
+          {/* Keep the big smiley face avatar */}
+          <motion.div 
+            className="flex flex-col items-center space-y-6"
+            initial={{ scale: 1, opacity: 1 }}
+            animate={{ scale: 1, opacity: 1 }}
+          >
+            {/* Smiley Face Avatar - same as welcome screen */}
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl">
+              <div className="w-28 h-28 rounded-full bg-purple-400 flex items-center justify-center relative">
+                {/* Eyes */}
+                <div className="absolute top-8 left-7 w-3 h-3 bg-purple-800 rounded-full"></div>
+                <div className="absolute top-8 right-7 w-3 h-3 bg-purple-800 rounded-full"></div>
+                {/* Smile */}
+                <div className="absolute bottom-8 w-12 h-6 border-b-4 border-purple-800 rounded-full"></div>
+              </div>
+            </div>
+            
+            {/* Chat title */}
+            <motion.div 
+              className="text-center"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <h2 className="text-xl font-bold text-gray-800">Talk to Serin</h2>
+              <p className="text-gray-600 text-sm">I'm here to listen</p>
+            </motion.div>
+          </motion.div>
+
+          {/* Chat messages with pop animation */}
           {currentMessage && (
             <motion.div 
               className="w-full max-w-md"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              initial={{ scale: 0.8, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 300, 
+                damping: 20,
+                delay: 0.2 
+              }}
+              key={currentMessage.id}
             >
-              <Card className="bg-white/70 backdrop-blur-xl border-purple-100/50 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-3">
-                    <Avatar className="h-8 w-8 bg-gradient-to-br from-purple-400 to-purple-500">
-                      <AvatarFallback className="text-xs font-bold text-white">S</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 space-y-2">
-                      {getMessageBadge(currentMessage.type)}
-                      <motion.p 
-                        className="text-sm text-gray-700 leading-relaxed"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                      >
-                        {displayedText}
-                        {isTyping && <span className="animate-pulse">|</span>}
-                      </motion.p>
+              <motion.div
+                className="relative"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
+                <Card className="bg-white/90 backdrop-blur-xl border-purple-100/50 shadow-xl">
+                  <CardContent className="p-6">
+                    <div className="flex items-start space-x-3">
+                      <Avatar className="h-8 w-8 bg-gradient-to-br from-purple-400 to-purple-500">
+                        <AvatarFallback className="text-xs font-bold text-white">S</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 space-y-2">
+                        {getMessageBadge(currentMessage.type)}
+                        <motion.p 
+                          className="text-sm text-gray-700 leading-relaxed"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                        >
+                          {displayedText}
+                          {isTyping && <span className="animate-pulse">|</span>}
+                        </motion.p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+                
+                {/* Speech bubble tail */}
+                <div className="absolute top-4 -left-2 w-4 h-4 bg-white/90 transform rotate-45 border-l border-b border-purple-100/50"></div>
+              </motion.div>
             </motion.div>
           )}
 
-          {/* Recommendations */}
+          {/* Recommendations with pop animation */}
           <AnimatePresence>
             {appState?.pendingRecommendations && appState.pendingRecommendations.length > 0 && (
               <motion.div 
                 className="w-full max-w-md space-y-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                initial={{ scale: 0.8, opacity: 0, y: 30 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: -30 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 20,
+                  delay: 0.4 
+                }}
               >
-                {appState.pendingRecommendations.map((rec) => (
-                  <RecommendationCard
+                {appState.pendingRecommendations.map((rec, index) => (
+                  <motion.div
                     key={rec.id}
-                    recommendation={rec}
-                    onAccept={() => handleAcceptRecommendation(rec.id, rec.type)}
-                    onDecline={() => handleDeclineRecommendation(rec.id)}
-                  />
+                    initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 20,
+                      delay: 0.1 * index 
+                    }}
+                  >
+                    <RecommendationCard
+                      recommendation={rec}
+                      onAccept={() => handleAcceptRecommendation(rec.id, rec.type)}
+                      onDecline={() => handleDeclineRecommendation(rec.id)}
+                    />
+                  </motion.div>
                 ))}
               </motion.div>
             )}
