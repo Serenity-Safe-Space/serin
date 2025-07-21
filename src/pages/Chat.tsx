@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/hooks/useAppState';
@@ -52,6 +53,7 @@ const Chat = () => {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [showChatInterface, setShowChatInterface] = useState(false);
   const [selectedChoice, setSelectedChoice] = useState("");
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Voice conversation with ElevenLabs
@@ -322,11 +324,10 @@ const Chat = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => appState?.availableFeatures?.profile && navigate('/profile')}
-            className="h-12 w-12 rounded-full bg-card/60 backdrop-blur-xl border border-primary/20 shadow-elegant hover:shadow-glow transition-all duration-300"
-            disabled={!appState?.availableFeatures?.profile}
+            onClick={() => setShowProfileModal(true)}
+            className="h-16 w-16 rounded-full bg-card/60 backdrop-blur-xl border border-primary/20 shadow-elegant hover:shadow-glow transition-all duration-300"
           >
-            <User className="h-6 w-6 text-orange-500" />
+            <User className="h-8 w-8 text-orange-500" />
           </Button>
           <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
             👤 Your Profile
@@ -334,49 +335,11 @@ const Chat = () => {
         </div>
       </motion.div>
 
-      {/* Gentle header */}
-      <header className="bg-white/60 backdrop-blur-xl border-b border-purple-100/50 sticky top-0 z-10">
-        <div className="max-w-lg mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              {/* Left side icons */}
-              <div className="flex items-center space-x-2">
-                <div className="group relative">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={showChatHistory}
-                    className="h-12 w-12 p-0 rounded-full hover:bg-purple-100/50"
-                  >
-                    <History className="h-6 w-6 text-blue-500" />
-                  </Button>
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
-                    🕒 View previous chats
-                  </div>
-                </div>
-                <div className="group relative">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={showGroupChat}
-                    className="h-12 w-12 p-0 rounded-full hover:bg-purple-100/50"
-                  >
-                    <Users className="h-6 w-6 text-green-500" />
-                  </Button>
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
-                    👥 Find support group
-                  </div>
-                </div>
-              </div>
-              
-            {/* Center title */}
-            <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-bold text-gray-800">Talk to Serin</h1>
-            </div>
-            </div>
-            
-            {/* Right side - Message navigation and voice */}
-            <div className="flex items-center space-x-3">
+      {/* Simplified header - only show when chat is active */}
+      {showChatInterface && (
+        <header className="bg-white/60 backdrop-blur-xl border-b border-purple-100/50 sticky top-0 z-10">
+          <div className="max-w-lg mx-auto px-6 py-4">
+            <div className="flex items-center justify-center">
               <div className="group relative">
                 <Button
                   variant="ghost"
@@ -392,34 +355,10 @@ const Chat = () => {
                   🎤 Talk to Serin
                 </div>
               </div>
-              
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <span className="font-medium">{currentMessageIndex + 1} / {allMessages.length}</span>
-                <div className="flex space-x-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigateMessages('prev')}
-                    disabled={currentMessageIndex === 0}
-                    className="h-8 w-8 p-0 rounded-full hover:bg-purple-100/50"
-                  >
-                    ←
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigateMessages('next')}
-                    disabled={currentMessageIndex === allMessages.length - 1}
-                    className="h-8 w-8 p-0 rounded-full hover:bg-purple-100/50"
-                  >
-                    →
-                  </Button>
-                </div>
-              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Conditional rendering - Welcome screen or Chat interface */}
       {!showChatInterface ? (
@@ -433,13 +372,13 @@ const Chat = () => {
             transition={{ duration: 0.6 }}
           >
             {/* Smiley Face Avatar */}
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl">
-              <div className="w-28 h-28 rounded-full bg-purple-400 flex items-center justify-center relative">
+            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl">
+              <div className="w-36 h-36 rounded-full bg-purple-400 flex items-center justify-center relative">
                 {/* Eyes */}
-                <div className="absolute top-8 left-7 w-3 h-3 bg-purple-800 rounded-full"></div>
-                <div className="absolute top-8 right-7 w-3 h-3 bg-purple-800 rounded-full"></div>
+                <div className="absolute top-10 left-9 w-4 h-4 bg-purple-800 rounded-full"></div>
+                <div className="absolute top-10 right-9 w-4 h-4 bg-purple-800 rounded-full"></div>
                 {/* Smile */}
-                <div className="absolute bottom-8 w-12 h-6 border-b-4 border-purple-800 rounded-full"></div>
+                <div className="absolute bottom-10 w-16 h-8 border-b-4 border-purple-800 rounded-full"></div>
               </div>
             </div>
             
@@ -507,26 +446,15 @@ const Chat = () => {
             animate={{ scale: 1, opacity: 1 }}
           >
             {/* Smiley Face Avatar - same as welcome screen */}
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl">
-              <div className="w-28 h-28 rounded-full bg-purple-400 flex items-center justify-center relative">
+            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl">
+              <div className="w-36 h-36 rounded-full bg-purple-400 flex items-center justify-center relative">
                 {/* Eyes */}
-                <div className="absolute top-8 left-7 w-3 h-3 bg-purple-800 rounded-full"></div>
-                <div className="absolute top-8 right-7 w-3 h-3 bg-purple-800 rounded-full"></div>
+                <div className="absolute top-10 left-9 w-4 h-4 bg-purple-800 rounded-full"></div>
+                <div className="absolute top-10 right-9 w-4 h-4 bg-purple-800 rounded-full"></div>
                 {/* Smile */}
-                <div className="absolute bottom-8 w-12 h-6 border-b-4 border-purple-800 rounded-full"></div>
+                <div className="absolute bottom-10 w-16 h-8 border-b-4 border-purple-800 rounded-full"></div>
               </div>
             </div>
-            
-            {/* Chat title */}
-            <motion.div 
-              className="text-center"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <h2 className="text-xl font-bold text-gray-800">Talk to Serin</h2>
-              <p className="text-gray-600 text-sm">I'm here to listen</p>
-            </motion.div>
           </motion.div>
 
           {/* Chat messages with pop animation */}
@@ -550,21 +478,15 @@ const Chat = () => {
               >
                 <Card className="bg-white/90 backdrop-blur-xl border-purple-100/50 shadow-xl">
                   <CardContent className="p-6">
-                    <div className="flex items-start space-x-3">
-                      <Avatar className="h-8 w-8 bg-gradient-to-br from-purple-400 to-purple-500">
-                        <AvatarFallback className="text-xs font-bold text-white">S</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 space-y-2">
-                        {getMessageBadge(currentMessage.type)}
-                        <motion.p 
-                          className="text-sm text-gray-700 leading-relaxed"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                        >
-                          {displayedText}
-                          {isTyping && <span className="animate-pulse">|</span>}
-                        </motion.p>
-                      </div>
+                    <div className="text-center space-y-4">
+                      <motion.p 
+                        className="text-lg text-gray-700 leading-relaxed font-medium"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        {displayedText}
+                        {isTyping && <span className="animate-pulse">|</span>}
+                      </motion.p>
                     </div>
                   </CardContent>
                 </Card>
@@ -674,6 +596,111 @@ const Chat = () => {
           </div>
         </div>
       )}
+
+      {/* Profile Modal */}
+      <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+        <DialogContent className="max-w-md mx-auto bg-gradient-to-br from-purple-50 to-white">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl font-bold text-purple-900 mb-4">Your Profile</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Profile Avatar */}
+            <div className="flex justify-center">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-xl">
+                <User className="h-12 w-12 text-white" />
+              </div>
+            </div>
+
+            {/* User Info */}
+            <div className="text-center space-y-2">
+              <h3 className="text-xl font-semibold text-gray-800">Anonymous User</h3>
+              <p className="text-gray-600">Wellness Journey Member</p>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4 py-4">
+              <div className="text-center space-y-2">
+                <div className="w-12 h-12 mx-auto rounded-full bg-blue-100 flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-gray-800">7</p>
+                  <p className="text-xs text-gray-600">Days Active</p>
+                </div>
+              </div>
+              
+              <div className="text-center space-y-2">
+                <div className="w-12 h-12 mx-auto rounded-full bg-green-100 flex items-center justify-center">
+                  <Heart className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-gray-800">24</p>
+                  <p className="text-xs text-gray-600">Check-ins</p>
+                </div>
+              </div>
+              
+              <div className="text-center space-y-2">
+                <div className="w-12 h-12 mx-auto rounded-full bg-yellow-100 flex items-center justify-center">
+                  <Trophy className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-gray-800">3</p>
+                  <p className="text-xs text-gray-600">Achievements</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="space-y-3">
+              <Button 
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white"
+                onClick={() => {
+                  setShowProfileModal(false);
+                  navigate('/profile');
+                }}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                View Full Profile
+              </Button>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  variant="outline" 
+                  className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                  onClick={() => {
+                    setShowProfileModal(false);
+                    navigate('/communities');
+                  }}
+                >
+                  <Users className="h-4 w-4 mr-1" />
+                  Communities
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                  onClick={() => {
+                    setShowProfileModal(false);
+                    navigate('/feed');
+                  }}
+                >
+                  <Star className="h-4 w-4 mr-1" />
+                  My Stories
+                </Button>
+              </div>
+            </div>
+
+            {/* Wellness Score */}
+            <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-4">
+              <div className="text-center space-y-2">
+                <p className="text-sm font-medium text-purple-800">Wellness Score</p>
+                <div className="text-3xl font-bold text-purple-900">8.2</div>
+                <p className="text-xs text-purple-600">Great progress this week! ✨</p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
