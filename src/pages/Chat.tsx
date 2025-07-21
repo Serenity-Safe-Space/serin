@@ -46,9 +46,12 @@ const Chat = () => {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [newMessage, setNewMessage] = useState('');
+  const [message, setMessage] = useState('');
   const [isUserTurn, setIsUserTurn] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [showChatInterface, setShowChatInterface] = useState(false);
+  const [selectedChoice, setSelectedChoice] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Voice conversation with ElevenLabs
@@ -295,6 +298,15 @@ const Chat = () => {
     console.log('Group chat requires backend - connect to Supabase first');
   };
 
+  const handleChoiceClick = (choice: string) => {
+    setSelectedChoice(choice);
+    setShowChatInterface(true);
+    setShowOnboarding(false);
+    // Pre-fill the message based on choice
+    setNewMessage(choice);
+    setIsUserTurn(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-violet-100/50 via-purple-50/30 to-white flex flex-col">
       {/* Floating profile avatar - always visible */}
@@ -409,263 +421,198 @@ const Chat = () => {
         </div>
       </header>
 
-      {/* Main voice interface area */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8">
-        {/* Central Voice Interface */}
-        <motion.div 
-          className="relative flex flex-col items-center space-y-6"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Voice Circle - matching the uploaded design */}
-          <div className="relative">
-            {/* Outer glow rings */}
-            <motion.div 
-              className={`absolute inset-0 rounded-full ${
-                isListening ? 'animate-pulse' : ''
-              }`}
-              style={{
-                background: 'radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0.05) 40%, transparent 70%)',
-                width: '280px',
-                height: '280px',
-                transform: 'translate(-50%, -50%)',
-                left: '50%',
-                top: '50%'
-              }}
-            />
-            
-            {/* Middle ring */}
-            <motion.div 
-              className={`absolute rounded-full border border-purple-200/30 ${
-                isListening ? 'animate-spin' : ''
-              }`}
-              style={{
-                width: '200px',
-                height: '200px',
-                transform: 'translate(-50%, -50%)',
-                left: '50%',
-                top: '50%',
-                background: 'radial-gradient(circle, rgba(196, 181, 253, 0.3) 0%, rgba(168, 85, 247, 0.1) 60%, transparent 100%)'
-              }}
-              animate={isListening ? { rotate: 360 } : {}}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            />
-            
-            {/* Inner circle with microphone */}
-            <motion.div 
-              className={`relative w-32 h-32 rounded-full flex items-center justify-center shadow-2xl cursor-pointer ${
-                isListening 
-                  ? 'bg-gradient-to-br from-purple-400 via-purple-300 to-purple-200' 
-                  : 'bg-gradient-to-br from-purple-300 via-purple-200 to-purple-100'
-              }`}
-              style={{
-                boxShadow: isListening 
-                  ? '0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(168, 85, 247, 0.2)' 
-                  : '0 20px 40px rgba(0, 0, 0, 0.1)'
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={toggleVoice}
-              animate={isListening ? { 
-                boxShadow: [
-                  '0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(168, 85, 247, 0.2)',
-                  '0 0 60px rgba(168, 85, 247, 0.6), 0 0 120px rgba(168, 85, 247, 0.3)',
-                  '0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(168, 85, 247, 0.2)'
-                ]
-              } : {
-                // Gentle glow on page load
-                boxShadow: [
-                  '0 20px 40px rgba(0, 0, 0, 0.1)',
-                  '0 0 30px rgba(168, 85, 247, 0.2), 0 20px 40px rgba(0, 0, 0, 0.1)',
-                  '0 20px 40px rgba(0, 0, 0, 0.1)'
-                ]
-              }}
-              transition={isListening 
-                ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
-                : { duration: 3, repeat: 2, ease: "easeInOut", delay: 1 }
-              }
-            >
-              <motion.div
-                animate={isListening ? { scale: [1, 1.1, 1] } : {}}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                {isListening ? (
-                  <MicOff className="h-8 w-8 text-white" />
-                ) : (
-                  <Mic className="h-8 w-8 text-purple-600" />
-                )}
-              </motion.div>
-            </motion.div>
-          </div>
-          
-          {/* Voice status text */}
+      {/* Conditional rendering - Welcome screen or Chat interface */}
+      {!showChatInterface ? (
+        /* Welcome Screen matching the uploaded image */
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-12">
+          {/* Purple smiley avatar */}
           <motion.div 
-            className="text-center space-y-3 relative"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            className="flex flex-col items-center space-y-8"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6 }}
           >
-            <h2 className="text-xl font-bold text-gray-800">
-              {isListening ? 'I\'m listening...' : 'Talk to Serin'}
-            </h2>
-            <p className="text-gray-600 max-w-sm">
-              Just say how you feel or ask a question — I'm listening.
-            </p>
-            
-            {/* Suggestion button */}
-            <motion.button
-              onClick={() => setNewMessage("Help me relax")}
-              className="mt-4 px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-full text-sm transition-colors"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-            >
-              Help me relax
-            </motion.button>
-            
-            {/* Onboarding tooltip */}
-            <AnimatePresence>
-              {showOnboarding && (
-                <motion.div
-                  className="absolute top-full mt-4 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-lg shadow-lg border border-purple-100 max-w-xs z-30"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ delay: 2 }}
-                >
-                  <p className="text-sm text-gray-600 mb-3">Here are a few things you can ask me...</p>
-                  <div className="space-y-2">
-                    {[
-                      "✅ I feel anxious",
-                      "✅ Help me fall asleep", 
-                      "✅ Can I talk to someone?"
-                    ].map((item) => (
-                      <p key={item} className="text-xs text-purple-600">{item}</p>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => setShowOnboarding(false)}
-                    className="mt-3 text-xs text-gray-400 hover:text-gray-600"
-                  >
-                    Skip
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </motion.div>
-
-        {/* Chat messages area - condensed and elegant */}
-        {currentMessage && (
-          <motion.div 
-            className="w-full max-w-md"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card className="bg-white/70 backdrop-blur-xl border-purple-100/50 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-3">
-                  <Avatar className="h-8 w-8 bg-gradient-to-br from-purple-400 to-purple-500">
-                    <AvatarFallback className="text-xs font-bold text-white">S</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-2">
-                    {getMessageBadge(currentMessage.type)}
-                    <motion.p 
-                      className="text-sm text-gray-700 leading-relaxed"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      {displayedText}
-                      {isTyping && <span className="animate-pulse">|</span>}
-                    </motion.p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Recommendations */}
-        <AnimatePresence>
-          {appState?.pendingRecommendations && appState.pendingRecommendations.length > 0 && (
-            <motion.div 
-              className="w-full max-w-md space-y-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              {appState.pendingRecommendations.map((rec) => (
-                <RecommendationCard
-                  key={rec.id}
-                  recommendation={rec}
-                  onAccept={() => handleAcceptRecommendation(rec.id, rec.type)}
-                  onDecline={() => handleDeclineRecommendation(rec.id)}
-                />
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Input area - at bottom */}
-      <div className="bg-white/80 backdrop-blur-xl border-t border-purple-100/50 p-6">
-        <div className="max-w-lg mx-auto">
-          <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="space-y-4">
-            {/* Message input */}
-            <div className="flex space-x-3">
-              <div className="flex-1 relative">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder={newMessage ? newMessage : "Tell me what's on your mind..."}
-                  disabled={!isUserTurn || isTyping}
-                  className="pr-20 py-3 text-base border-purple-200/50 focus:border-purple-300 focus:ring-purple-300/20 bg-white/70 min-h-[48px]"
-                />
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
-                  <Button
-                    type="button"
-                    onClick={toggleVoice}
-                    className={`h-8 w-8 p-0 rounded-full ${
-                      isListening ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
-                    }`}
-                  >
-                    <Mic className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={!newMessage.trim() || !isUserTurn || isTyping}
-                    className="h-8 w-8 p-0 rounded-full bg-gradient-primary hover:bg-gradient-primary/90"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
+            {/* Smiley Face Avatar */}
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl">
+              <div className="w-28 h-28 rounded-full bg-purple-400 flex items-center justify-center relative">
+                {/* Eyes */}
+                <div className="absolute top-8 left-7 w-3 h-3 bg-purple-800 rounded-full"></div>
+                <div className="absolute top-8 right-7 w-3 h-3 bg-purple-800 rounded-full"></div>
+                {/* Smile */}
+                <div className="absolute bottom-8 w-12 h-6 border-b-4 border-purple-800 rounded-full"></div>
               </div>
             </div>
             
-            {/* Input suggestions */}
-            {!newMessage && (
-              <div className="flex flex-wrap gap-2 justify-center">
-                {[
-                  "I feel overwhelmed...",
-                  "Can I ask a question?",
-                  "Help me fall asleep"
-                ].map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    onClick={() => setNewMessage(suggestion)}
-                    className="px-3 py-1 text-xs bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-full transition-colors"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            )}
-          </form>
+            {/* Welcome Text */}
+            <motion.div 
+              className="text-center space-y-4 max-w-sm"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <h1 className="text-3xl font-bold text-purple-900 leading-tight">
+                Hey, nice to meet you.<br />
+                I'm here to help you<br />
+                have the life you<br />
+                really want!
+              </h1>
+            </motion.div>
+          </motion.div>
+
+          {/* Choice Buttons */}
+          <motion.div 
+            className="flex flex-col space-y-4 w-full max-w-sm"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.7 }}
+          >
+            {/* Choice 1 - Purple */}
+            <motion.button
+              onClick={() => handleChoiceClick("I don't feel good")}
+              className="w-full py-4 px-6 bg-purple-300 hover:bg-purple-400 text-purple-900 rounded-full text-lg font-medium transition-colors shadow-lg"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              I don't feel good
+            </motion.button>
+
+            {/* Choice 2 - Yellow */}
+            <motion.button
+              onClick={() => handleChoiceClick("I want to connect with peers")}
+              className="w-full py-4 px-6 bg-yellow-200 hover:bg-yellow-300 text-yellow-900 rounded-full text-lg font-medium transition-colors shadow-lg"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              I want to connect with peers
+            </motion.button>
+
+            {/* Choice 3 - Pink */}
+            <motion.button
+              onClick={() => handleChoiceClick("Something else")}
+              className="w-full py-4 px-6 bg-pink-200 hover:bg-pink-300 text-pink-900 rounded-full text-lg font-medium transition-colors shadow-lg"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Something else
+            </motion.button>
+          </motion.div>
         </div>
-      </div>
+      ) : (
+        /* Chat Interface */
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8">
+          {/* Chat messages area - condensed and elegant */}
+          {currentMessage && (
+            <motion.div 
+              className="w-full max-w-md"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Card className="bg-white/70 backdrop-blur-xl border-purple-100/50 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-3">
+                    <Avatar className="h-8 w-8 bg-gradient-to-br from-purple-400 to-purple-500">
+                      <AvatarFallback className="text-xs font-bold text-white">S</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 space-y-2">
+                      {getMessageBadge(currentMessage.type)}
+                      <motion.p 
+                        className="text-sm text-gray-700 leading-relaxed"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        {displayedText}
+                        {isTyping && <span className="animate-pulse">|</span>}
+                      </motion.p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Recommendations */}
+          <AnimatePresence>
+            {appState?.pendingRecommendations && appState.pendingRecommendations.length > 0 && (
+              <motion.div 
+                className="w-full max-w-md space-y-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                {appState.pendingRecommendations.map((rec) => (
+                  <RecommendationCard
+                    key={rec.id}
+                    recommendation={rec}
+                    onAccept={() => handleAcceptRecommendation(rec.id, rec.type)}
+                    onDecline={() => handleDeclineRecommendation(rec.id)}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Input area - only shown when chat interface is active */}
+      {showChatInterface && (
+        <div className="bg-white/80 backdrop-blur-xl border-t border-purple-100/50 p-6">
+          <div className="max-w-lg mx-auto">
+            <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="space-y-4">
+              {/* Message input */}
+              <div className="flex space-x-3">
+                <div className="flex-1 relative">
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Tell me what's on your mind..."
+                    disabled={!isUserTurn || isTyping}
+                    className="pr-20 py-3 text-base border-purple-200/50 focus:border-purple-300 focus:ring-purple-300/20 bg-white/70 min-h-[48px]"
+                  />
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+                    <Button
+                      type="button"
+                      onClick={toggleVoice}
+                      className={`h-8 w-8 p-0 rounded-full ${
+                        isListening ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Mic className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={!newMessage.trim() || !isUserTurn || isTyping}
+                      className="h-8 w-8 p-0 rounded-full bg-gradient-primary hover:bg-gradient-primary/90"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Input suggestions */}
+              {!newMessage && (
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {[
+                    "I feel overwhelmed...",
+                    "Can I ask a question?",
+                    "Help me fall asleep"
+                  ].map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => setNewMessage(suggestion)}
+                      className="px-3 py-1 text-xs bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-full transition-colors"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
