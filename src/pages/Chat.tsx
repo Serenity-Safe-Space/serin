@@ -529,11 +529,14 @@ const Chat = () => {
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
           >
             {/* Smaller Microphone Icon */}
-            <div className="relative">
-              <div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 blur-lg scale-110 opacity-60"></div>
-              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-500 flex items-center justify-center shadow-xl">
-                <Mic className="w-8 h-8 text-white" />
+            <div className="relative flex flex-col items-center">
+              <div className="relative">
+                <div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 blur-lg scale-110 opacity-60"></div>
+                <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-500 flex items-center justify-center shadow-xl">
+                  <Mic className="w-8 h-8 text-white" />
+                </div>
               </div>
+              <span className="text-xs text-gray-600 mt-2">Too tired to type? Just say it out loud.</span>
             </div>
 
             {/* Smaller Chat Icon - Clickable to switch to peer chat */}
@@ -560,9 +563,8 @@ const Chat = () => {
               transition={{ delay: 0.3 }}
             >
               <h1 className="text-2xl font-medium text-purple-900 leading-relaxed">
-                hey, nice to meet you!<br />
-                i'm here to help you have the<br />
-                life you really want
+                Gotchu. Let's talk about it.<br />
+                Mood. I'm here. Spill it.
               </h1>
             </motion.div>
 
@@ -578,7 +580,7 @@ const Chat = () => {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder="message..."
+                  placeholder="What's on your mind today? Wanna vent, ask for advice, or just chill?"
                   className="flex-1 border-none bg-transparent text-gray-700 placeholder-gray-500 focus:ring-0 text-lg"
                 />
                 <Button

@@ -67,7 +67,7 @@ const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
           transition={{ delay: 0.4 }}
         >
           <h2 className="text-2xl font-bold text-gray-800 leading-tight">
-            I've matched you with another peer to connect and support each other.
+            Meet your vibe buddy ✨ Time to hype each other up or just be real.
           </h2>
         </motion.div>
 
@@ -96,7 +96,7 @@ const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
                 </div>
               </div>
             </div>
-            <span className="text-xl font-semibold text-gray-800">Emma</span>
+            <span className="text-xl font-semibold text-gray-800">Luna 🌙</span>
           </motion.div>
 
           {/* Ethan */}
@@ -114,7 +114,7 @@ const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
                 </div>
               </div>
             </div>
-            <span className="text-xl font-semibold text-gray-800">Ethan</span>
+            <span className="text-xl font-semibold text-gray-800">Ethan 💬</span>
           </motion.div>
         </motion.div>
 
@@ -130,8 +130,7 @@ const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
             className="w-full py-4 px-8 bg-gradient-to-r from-yellow-300 to-yellow-400 hover:from-yellow-400 hover:to-yellow-500 text-purple-700 rounded-full text-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl border-none"
             size="lg"
           >
-            <MessageCircle className="w-6 h-6 mr-2" />
-            Begin Chat
+            Start Chat 💌
           </Button>
         </motion.div>
 
