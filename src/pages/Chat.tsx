@@ -451,18 +451,16 @@ const Chat = () => {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Smiley Face Avatar with enhanced glow */}
+            {/* Llama Avatar with enhanced glow */}
             <div className="relative">
               {/* Glow effect background */}
               <div className="absolute inset-0 w-40 h-40 rounded-full bg-gradient-to-br from-purple-300 to-purple-400 blur-2xl scale-110 opacity-60"></div>
-              <div className="relative w-40 h-40 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl">
-                <div className="w-36 h-36 rounded-full bg-purple-400 flex items-center justify-center relative">
-                  {/* Eyes */}
-                  <div className="absolute top-10 left-9 w-4 h-4 bg-purple-800 rounded-full"></div>
-                  <div className="absolute top-10 right-9 w-4 h-4 bg-purple-800 rounded-full"></div>
-                  {/* Smile */}
-                  <div className="absolute bottom-10 w-16 h-8 border-b-4 border-purple-800 rounded-full"></div>
-                </div>
+              <div className="relative w-40 h-40 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl overflow-hidden">
+                <img 
+                  src="/lovable-uploads/2f5d5174-f2f2-424d-b6d9-61b81c9bca6b.png" 
+                  alt="Llama avatar"
+                  className="w-36 h-36 object-cover rounded-full"
+                />
               </div>
             </div>
             
