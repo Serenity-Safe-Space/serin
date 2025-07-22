@@ -12,7 +12,7 @@ const Profile = () => {
         <div className="max-w-lg mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Profile
+              Your Space
             </h1>
             <Button variant="ghost" size="sm" className="rounded-2xl">
               <Settings className="h-4 w-4" />
@@ -32,7 +32,7 @@ const Profile = () => {
         <div className="space-y-3 pt-4">
           <Button variant="outline" className="w-full justify-start h-12 rounded-3xl">
             <User className="h-5 w-5 mr-3" />
-            Edit Profile
+            Edit My Vibe
           </Button>
           <Button variant="outline" className="w-full justify-start h-12 rounded-3xl">
             <Settings className="h-5 w-5 mr-3" />

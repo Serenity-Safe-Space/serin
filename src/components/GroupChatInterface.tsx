@@ -100,7 +100,7 @@ const GroupChatInterface: React.FC<GroupChatInterfaceProps> = ({ onClose }) => {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Send a message"
+            placeholder="Say hey 👋 or drop your thoughts…"
             className="flex-1 border-none bg-transparent text-gray-700 placeholder-gray-500 focus:ring-0 text-lg"
           />
           <Button
