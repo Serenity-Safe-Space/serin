@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send } from 'lucide-react';
+import { Send, ArrowLeft, Flag, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 
 interface GroupChatInterfaceProps {
   onClose: () => void;
@@ -24,16 +25,60 @@ const GroupChatInterface: React.FC<GroupChatInterfaceProps> = ({ onClose }) => {
     }
   };
 
+  const conversationPrompts = [
+    "Today's topic: How do you handle stress?",
+    "Let's share 1 small win today.",
+    "What's one thing you're grateful for right now?",
+    "How do you practice self-care?"
+  ];
+
+  const currentPrompt = conversationPrompts[Math.floor(Math.random() * conversationPrompts.length)];
+
   return (
-    <div className="flex-1 flex flex-col bg-gradient-to-br from-purple-50 to-pink-50">
-      {/* Header with avatars - no fixed positioning since it's handled by parent */}
+    <div className="flex-1 flex flex-col bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
+      {/* Header with back button and report */}
+      <div className="flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm border-b border-purple-100/50">
+        <Button
+          onClick={onClose}
+          variant="ghost"
+          size="sm"
+          className="rounded-full p-2"
+        >
+          <ArrowLeft className="w-5 h-5 text-purple-600" />
+        </Button>
+        <h2 className="text-lg font-semibold text-purple-700">Chat Room</h2>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="rounded-full p-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+          onClick={() => console.log('Report clicked')}
+        >
+          <Flag className="w-5 h-5" />
+        </Button>
+      </div>
+
+      {/* Conversation Prompt */}
+      <motion.div
+        className="px-6 pt-4"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Card className="p-3 bg-gradient-to-r from-yellow-100 to-yellow-200 border-yellow-300/50">
+          <div className="flex items-center space-x-2">
+            <Lightbulb className="w-4 h-4 text-yellow-600" />
+            <p className="text-sm font-medium text-yellow-800">{currentPrompt}</p>
+          </div>
+        </Card>
+      </motion.div>
+      {/* User avatars with nicknames */}
       <motion.div 
-        className="flex items-center justify-center space-x-12 pt-12 pb-8"
+        className="flex items-center justify-center space-x-12 pt-8 pb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Emma */}
+        {/* KindSoul91 */}
         <div className="flex flex-col items-center space-y-3">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-200 to-pink-300 flex items-center justify-center shadow-lg">
             <div className="w-16 h-16 rounded-full bg-orange-300 flex items-center justify-center relative overflow-hidden">
@@ -42,10 +87,10 @@ const GroupChatInterface: React.FC<GroupChatInterfaceProps> = ({ onClose }) => {
               </div>
             </div>
           </div>
-          <span className="text-lg font-semibold text-purple-600">Emma</span>
+          <span className="text-sm font-semibold text-purple-600">KindSoul91</span>
         </div>
 
-        {/* Ethan */}
+        {/* VibeChecker42 */}
         <div className="flex flex-col items-center space-y-3">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 flex items-center justify-center shadow-lg">
             <div className="w-16 h-16 rounded-full bg-purple-400 flex items-center justify-center relative overflow-hidden">
@@ -54,7 +99,7 @@ const GroupChatInterface: React.FC<GroupChatInterfaceProps> = ({ onClose }) => {
               </div>
             </div>
           </div>
-          <span className="text-lg font-semibold text-purple-600">Ethan</span>
+          <span className="text-sm font-semibold text-purple-600">VibeChecker42</span>
         </div>
       </motion.div>
 
@@ -100,7 +145,7 @@ const GroupChatInterface: React.FC<GroupChatInterfaceProps> = ({ onClose }) => {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Say hey 👋 or drop your thoughts…"
+            placeholder={message.trim() === '' ? "Say hey 👋 or drop your thoughts…" : "You good? (Or nah?)"}
             className="flex-1 border-none bg-transparent text-gray-700 placeholder-gray-500 focus:ring-0 text-lg"
           />
           <Button

@@ -1,24 +1,28 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Mic, MessageCircle, Clock } from 'lucide-react';
+import { Mic, MessageCircle, Clock, RotateCcw, Shield } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PeerMatchingInterfaceProps {
   onClose: () => void;
   onBeginChat: () => void;
   onChatHistory: () => void;
   onViewProfile?: () => void;
+  onMatchAgain?: () => void;
 }
 
 const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
   onClose,
   onBeginChat,
   onChatHistory,
-  onViewProfile
+  onViewProfile,
+  onMatchAgain = () => console.log('Match again clicked')
 }) => {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8 min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <TooltipProvider>
+    <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8 min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
       {/* Chat History Icon - Fixed position */}
       <motion.button
         onClick={onChatHistory}
@@ -134,6 +138,43 @@ const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
           </Button>
         </motion.div>
 
+        {/* Match Again Button */}
+        <motion.div
+          className="w-full"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.3 }}
+        >
+          <Button
+            onClick={onMatchAgain}
+            variant="outline"
+            className="w-full py-3 px-6 rounded-full text-lg font-medium transition-all duration-300 border-purple-200 hover:border-purple-300 hover:bg-purple-50"
+            size="lg"
+          >
+            <RotateCcw className="w-5 h-5 mr-2" />
+            Match Again
+          </Button>
+        </motion.div>
+
+        {/* Safety Reminder */}
+        <motion.div
+          className="flex justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" className="rounded-full p-2">
+                <Shield className="w-5 h-5 text-purple-600" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-center">
+              <p>Always stay kind. You can report any harmful messages.</p>
+            </TooltipContent>
+          </Tooltip>
+        </motion.div>
+
         {/* Connection Info */}
         <motion.div
           className="text-center text-sm text-gray-600 space-y-2"
@@ -150,6 +191,7 @@ const PeerMatchingInterface: React.FC<PeerMatchingInterfaceProps> = ({
         </motion.div>
       </motion.div>
     </div>
+    </TooltipProvider>
   );
 };
 

@@ -414,7 +414,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-100/50 via-purple-50/30 to-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-violet-100/50 via-purple-50/30 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col">
       {/* Floating profile avatar - always visible */}
       <motion.div
         className="fixed top-6 right-6 z-50"

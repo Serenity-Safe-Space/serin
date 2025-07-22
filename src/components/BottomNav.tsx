@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sparkles, Users, MessageCircle, User, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAppState } from '@/hooks/useAppState';
 
 const BottomNav = () => {
@@ -52,7 +53,8 @@ const BottomNav = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-primary/10 z-20 rounded-t-3xl">
       <div className="max-w-lg mx-auto px-6 py-4">
-        <div className="flex justify-around">
+        <div className="flex justify-around items-center">
+          <ThemeToggle />
           {navItems.map(({ path, icon: Icon, label, emoji, available }) => {
             const isActive = location.pathname === path;
             
@@ -80,6 +82,7 @@ const BottomNav = () => {
               </Button>
             );
           })}
+          <div /> {/* Spacer for balance */}
         </div>
       </div>
     </nav>
