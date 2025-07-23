@@ -389,31 +389,7 @@ const Chat = () => {
   if (showGroupChat) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex flex-col">
-        {/* Navigation header for group chat */}
-        <div className="flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm border-b border-purple-100/50">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={switchToAIChat}
-            className="flex items-center space-x-2 text-purple-600 hover:bg-purple-100/50"
-          >
-            <Bot className="w-5 h-5" />
-            <span>AI Chat</span>
-          </Button>
-
-          <h2 className="text-lg font-semibold text-purple-900">Peer Chat</h2>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCloseAll}
-            className="text-purple-600 hover:bg-purple-100/50"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-        </div>
-
-        <GroupChatInterface onClose={handleCloseAll} />
+        <GroupChatInterface onClose={handleCloseAll} onSwitchToAI={switchToAIChat} />
       </div>
     );
   }

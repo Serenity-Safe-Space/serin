@@ -7,9 +7,10 @@ import { Card } from '@/components/ui/card';
 
 interface GroupChatInterfaceProps {
   onClose: () => void;
+  onSwitchToAI: () => void;
 }
 
-const GroupChatInterface: React.FC<GroupChatInterfaceProps> = ({ onClose }) => {
+const GroupChatInterface: React.FC<GroupChatInterfaceProps> = ({ onClose, onSwitchToAI }) => {
   const [message, setMessage] = useState('');
 
   const handleSendMessage = () => {
@@ -32,19 +33,22 @@ const GroupChatInterface: React.FC<GroupChatInterfaceProps> = ({ onClose }) => {
     "How do you practice self-care?"
   ];
 
-  const currentPrompt = conversationPrompts[Math.floor(Math.random() * conversationPrompts.length)];
+  const [currentPrompt] = useState(() => 
+    conversationPrompts[Math.floor(Math.random() * conversationPrompts.length)]
+  );
 
   return (
     <div className="flex-1 flex flex-col bg-pink-50">
-      {/* Header with back button and report */}
+      {/* Header with Talk to Serin button and report */}
       <div className="flex items-center justify-between p-4 bg-white">
         <Button
-          onClick={onClose}
+          onClick={onSwitchToAI}
           variant="ghost"
           size="sm"
-          className="rounded-full p-2"
+          className="flex items-center space-x-2 text-purple-600 hover:bg-purple-100/50"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
+          <span>🦙</span>
+          <span>Talk to Serin</span>
         </Button>
         <Button
           variant="ghost"
