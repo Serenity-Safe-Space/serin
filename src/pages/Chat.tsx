@@ -548,34 +548,37 @@ const Chat = () => {
       ) : (
         /* Chat Interface - Small icons on top, centered content */
         <div className="flex-1 flex flex-col">
-          {/* Small icons at the top */}
+          {/* Top button section */}
           <motion.div
-            className="flex items-center justify-center space-x-6 pt-8 pb-4"
+            className="flex items-start justify-center space-x-8 pt-12 pb-8"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
           >
-            {/* Smaller Microphone Icon */}
-            <div className="relative flex flex-col items-center">
-              <div className="relative">
-                <div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 blur-lg scale-110 opacity-60"></div>
-                <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-500 flex items-center justify-center shadow-xl">
-                  <Mic className="w-8 h-8 text-white" />
-                </div>
+            {/* Voice Input Button */}
+            <div className="flex flex-col items-center space-y-3">
+              <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center shadow-lg">
+                <Mic className="w-7 h-7 text-purple-600" />
               </div>
-              <span className="text-xs text-gray-600 mt-2">Too tired to type? Just say it out loud.</span>
+              <div className="text-center max-w-24">
+                <p className="text-sm text-gray-700 font-medium leading-tight">Too tired to type?</p>
+                <p className="text-xs text-gray-600">Just say it out loud</p>
+              </div>
             </div>
 
-            {/* Smaller Chat Icon - Clickable to switch to peer chat */}
+            {/* Peer Connect Button */}
             <motion.button
               onClick={switchToPeerChat}
-              className="relative"
+              className="flex flex-col items-center space-y-3"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-br from-green-300 to-teal-300 blur-lg scale-110 opacity-60"></div>
-              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-green-400 via-teal-400 to-green-500 flex items-center justify-center shadow-xl">
-                <Users className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 rounded-full bg-teal-400 flex items-center justify-center shadow-lg">
+                <Users className="w-7 h-7 text-white" />
+              </div>
+              <div className="text-center max-w-24">
+                <p className="text-sm text-gray-700 font-medium leading-tight">Wanna talk</p>
+                <p className="text-xs text-gray-600">to someone like you</p>
               </div>
             </motion.button>
           </motion.div>
@@ -584,41 +587,59 @@ const Chat = () => {
           <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8">
             {/* Welcome text */}
             <motion.div
-              className="text-center space-y-4 max-w-sm"
+              className="text-center space-y-4 max-w-md"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <h1 className="text-2xl font-medium text-purple-900 leading-relaxed">
-                Gotchu. Let's talk about it.<br />
-                Mood. I'm here. Spill it.
+              <h1 className="text-3xl font-bold text-slate-800 leading-tight">
+                Gotchu. Let's talk.
               </h1>
+              <h2 className="text-3xl font-bold text-slate-800 leading-tight">
+                Mood's all yours – spill it
+              </h2>
             </motion.div>
 
             {/* Input area */}
             <motion.div
-              className="w-full max-w-md"
+              className="w-full max-w-lg"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
             >
-              <div className="flex items-center space-x-3 bg-white/80 backdrop-blur-sm rounded-full p-3 shadow-lg">
+              <div className="flex items-center space-x-3 bg-white rounded-full p-4 shadow-md border border-gray-100">
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder="What's on your mind today? Wanna vent, ask for advice, or just chill?"
-                  className="flex-1 border-none bg-transparent text-gray-700 placeholder-gray-500 focus:ring-0 text-lg"
+                  placeholder="Say anything... I'm listening"
+                  className="flex-1 border-none bg-transparent text-gray-700 placeholder-gray-400 focus:ring-0 text-base"
                 />
                 <Button
                   onClick={sendMessage}
                   size="sm"
-                  className="w-12 h-12 rounded-full bg-purple-500 hover:bg-purple-600 text-white p-0"
+                  className="w-10 h-10 rounded-full bg-purple-500 hover:bg-purple-600 text-white p-0 shrink-0"
                   disabled={!isUserTurn || !newMessage.trim()}
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4 h-4" />
                 </Button>
               </div>
+            </motion.div>
+
+            {/* Privacy notice */}
+            <motion.div
+              className="text-center space-y-2"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.9 }}
+            >
+              <p className="text-sm text-gray-500 flex items-center justify-center space-x-1">
+                <span>🔒</span>
+                <span>Private. Just you & Serin.</span>
+              </p>
+              <p className="text-sm text-purple-600 underline cursor-pointer hover:text-purple-700">
+                Learn how we use your data
+              </p>
             </motion.div>
           </div>
 
