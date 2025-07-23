@@ -15,6 +15,7 @@ import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import EmailConfirmation from "./pages/EmailConfirmation";
 import NotFound from "./pages/NotFound";
+import "@/utils/deploymentCheck"; // Auto-run deployment checks
 
 const queryClient = new QueryClient();
 

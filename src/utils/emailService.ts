@@ -1,6 +1,22 @@
 // Email service utility for sending welcome and other emails via Resend
 // Uses Resend API directly for sending custom emails
 
+/**
+ * Gets the appropriate app URL for different environments
+ */
+function getAppURL(): string {
+  // Production - check for common production domains
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname.includes('vercel.app') || hostname.includes('netlify.app') || !hostname.includes('localhost')) {
+      return window.location.origin;
+    }
+  }
+  
+  // Development fallback
+  return 'http://localhost:8080';
+}
+
 interface WelcomeEmailData {
   email: string;
   name: string;
@@ -142,7 +158,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<EmailRes
             </div>
 
             <div style="text-align: center;">
-              <a href="https://your-app-domain.com/chat" class="cta-button">
+              <a href="${getAppURL()}/chat" class="cta-button">
                 Start Your Wellness Journey →
               </a>
             </div>
@@ -173,7 +189,7 @@ What you can do with Serin:
 📱 Access a supportive community anytime, anywhere
 🌱 Track your progress and celebrate growth
 
-Ready to get started? Visit: https://your-app-domain.com/chat
+Ready to get started? Visit: ${getAppURL()}/chat
 
 Your mental health matters, and we're here to support you every step of the way. Take it one day at a time. 🌸
 
