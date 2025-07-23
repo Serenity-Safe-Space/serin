@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy, MessageCircle, ArrowLeft, Bot, Instagram, Mail, LogOut } from 'lucide-react';
+import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy, MessageCircle, ArrowLeft, Bot, Instagram, Mail, LogOut, Edit } from 'lucide-react';
 import PeerMatchingInterface from '@/components/PeerMatchingInterface';
 import GroupChatInterface from '@/components/GroupChatInterface';
 import ProfileView from '@/components/ProfileView';
@@ -15,6 +15,7 @@ import { useAppState } from '@/hooks/useAppState';
 import RecommendationCard from '@/components/RecommendationCard';
 import { useConversation } from '@11labs/react';
 import { useAuth } from '@/contexts/AuthContext';
+import { validateNickname } from '@/utils/nicknameGenerator';
 
 interface Message {
   id: string;
@@ -35,7 +36,7 @@ const Chat = () => {
     completeWelcome
   } = useAppState();
   const navigate = useNavigate();
-  const { signOut, user, profile } = useAuth();
+  const { signOut, user, profile, updateProfile, resendConfirmationEmail } = useAuth();
 
   const [allMessages, setAllMessages] = useState<Message[]>([
     {
@@ -64,6 +65,9 @@ const Chat = () => {
   const [showProfileView, setShowProfileView] = useState(false);
   const [chatMode, setChatMode] = useState<'ai' | 'peer'>('ai'); // Track current chat mode
   const [welcomeTextVariant, setWelcomeTextVariant] = useState(0); // 0 for main, 1 for variant
+  const [isEditingNickname, setIsEditingNickname] = useState(false);
+  const [editedNickname, setEditedNickname] = useState('');
+  const [isResendingEmail, setIsResendingEmail] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Voice conversation with ElevenLabs
@@ -358,6 +362,62 @@ const Chat = () => {
     setChatMode('ai'); // Reset to AI chat mode
   };
 
+  const handleEditNickname = () => {
+    setEditedNickname(profile?.nickname || '');
+    setIsEditingNickname(true);
+  };
+
+  const handleSaveNickname = async () => {
+    if (!editedNickname.trim()) return;
+
+    const validation = validateNickname(editedNickname);
+    if (!validation.isValid) {
+      alert(validation.error);
+      return;
+    }
+
+    const { error } = await updateProfile({ nickname: editedNickname });
+    if (error) {
+      console.error('Error updating nickname:', error);
+      alert('Failed to update nickname. Please try again.');
+    } else {
+      setIsEditingNickname(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingNickname(false);
+    setEditedNickname('');
+  };
+
+  const handleResendConfirmation = async () => {
+    // Check if email is already confirmed
+    const isEmailConfirmed = user?.email_confirmed_at || profile?.email_confirmed;
+    if (isEmailConfirmed) {
+      alert('Your email is already confirmed! No need to resend.');
+      return;
+    }
+
+    setIsResendingEmail(true);
+    console.log('Chat: User clicked resend confirmation email');
+    
+    try {
+      const { error } = await resendConfirmationEmail();
+      if (error) {
+        console.error('Chat: Error resending confirmation:', error);
+        alert(`Failed to resend confirmation email: ${error.message || 'Unknown error'}. Check the browser console and Supabase Auth logs for more details.`);
+      } else {
+        console.log('Chat: Resend request completed successfully');
+        alert('Confirmation email sent! Please check your inbox and click the confirmation link.');
+      }
+    } catch (error) {
+      console.error('Chat: Unexpected error:', error);
+      alert('Failed to resend confirmation email. Check the browser console for details.');
+    } finally {
+      setIsResendingEmail(false);
+    }
+  };
+
   // Function to switch between AI and peer chat
   const switchToPeerChat = () => {
     if (chatMode === 'ai') {
@@ -642,8 +702,51 @@ const Chat = () => {
 
             {/* User Info */}
             <div className="text-center space-y-2">
-              <h3 className="text-xl font-semibold text-gray-800">You</h3>
-              <p className="text-gray-600">Wellness Journey Member</p>
+              {isEditingNickname ? (
+                <div className="space-y-3">
+                  <Input
+                    value={editedNickname}
+                    onChange={(e) => setEditedNickname(e.target.value)}
+                    className="text-center text-xl font-semibold"
+                    maxLength={20}
+                    placeholder="Enter nickname"
+                  />
+                  <div className="flex space-x-2 justify-center">
+                    <Button
+                      size="sm"
+                      onClick={handleSaveNickname}
+                      className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-1 text-sm"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelEdit}
+                      className="px-4 py-1 text-sm"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-center space-x-2">
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      {profile?.nickname || user?.user_metadata?.name || 'You'}
+                    </h3>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleEditNickname}
+                      className="h-6 w-6 p-0 hover:bg-gray-100"
+                    >
+                      <Edit className="h-3 w-3 text-gray-500" />
+                    </Button>
+                  </div>
+                  <p className="text-gray-600">Wellness Journey Member</p>
+                </div>
+              )}
             </div>
 
             {/* Stats */}
@@ -678,6 +781,34 @@ const Chat = () => {
                 </div>
               </div>
             </div>
+
+            {/* Email Confirmation Status */}
+            {(() => {
+              // Check both auth state and profile state for email confirmation
+              const isEmailConfirmed = user?.email_confirmed_at || profile?.email_confirmed;
+              const shouldShowConfirmation = user && !isEmailConfirmed;
+              
+              return shouldShowConfirmation && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                    <p className="text-sm font-medium text-yellow-800">Email Confirmation Pending</p>
+                  </div>
+                  <p className="text-xs text-yellow-700">
+                    Please check your inbox and confirm your email address to access all features.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleResendConfirmation}
+                    disabled={isResendingEmail}
+                    className="w-full border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                  >
+                    {isResendingEmail ? 'Sending...' : 'Resend Confirmation Email'}
+                  </Button>
+                </div>
+              );
+            })()}
 
             {/* Action Buttons */}
             <div className="space-y-3">

@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase, UserProfile } from '@/lib/supabase'
+import { generateNickname } from '@/utils/nicknameGenerator'
+import { sendWelcomeEmail } from '@/utils/emailService'
 
 interface AuthContextType {
   user: User | null
@@ -10,6 +12,8 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error: AuthError | null }>
   signOut: () => Promise<{ error: AuthError | null }>
   updateProfile: (updates: Partial<UserProfile>) => Promise<{ error: AuthError | null }>
+  resendConfirmationEmail: () => Promise<{ error: AuthError | null }>
+  confirmEmail: (token: string) => Promise<{ error: AuthError | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -138,14 +142,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (user) {
+        // Generate unique nickname with retry logic
+        let nickname = generateNickname()
+        let attempts = 0
+        const maxAttempts = 5
+
+        // Check for nickname uniqueness and retry if needed
+        while (attempts < maxAttempts) {
+          const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('nickname', nickname)
+            .single()
+
+          if (!existingProfile) {
+            // Nickname is unique, break out of loop
+            break
+          }
+
+          // Generate new nickname and try again
+          nickname = generateNickname()
+          attempts++
+        }
+
         const newProfile = {
           id: userId,
           email: user.email || '',
           full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
           avatar_url: user.user_metadata?.avatar_url || null,
+          nickname: nickname,
+          email_confirmed: user.email_confirmed_at ? true : false,
+          email_confirmed_at: user.email_confirmed_at || null,
         }
 
-        console.log('AuthContext: Inserting profile:', newProfile)
+        console.log('AuthContext: Inserting profile with nickname:', newProfile)
         const { data, error } = await supabase
           .from('profiles')
           .insert([newProfile])
@@ -159,8 +189,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Don't let profile creation errors block auth
           console.log('AuthContext: Continuing without profile creation')
         } else {
-          console.log('AuthContext: Profile created successfully')
+          console.log('AuthContext: Profile created successfully with nickname:', data.nickname)
           setProfile(data)
+          
+          // Send welcome email to new user (don't block on email failure)
+          sendWelcomeEmail({
+            email: user.email || '',
+            name: user.user_metadata?.full_name || user.user_metadata?.name || 'New User',
+            nickname: data.nickname,
+            signupDate: user.created_at || new Date().toISOString()
+          }).then(result => {
+            if (result.success) {
+              console.log('AuthContext: Welcome email sent successfully:', result.messageId)
+            } else {
+              console.error('AuthContext: Failed to send welcome email:', result.error)
+              // Don't block user flow for email failures
+            }
+          }).catch(error => {
+            console.error('AuthContext: Welcome email exception:', error)
+            // Don't block user flow for email failures
+          })
         }
       } else {
         console.log('AuthContext: No user found for profile creation')
@@ -229,6 +277,88 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const resendConfirmationEmail = async () => {
+    try {
+      console.log('AuthContext: Starting resend confirmation email...')
+      
+      if (!user?.email) {
+        console.error('AuthContext: No user email found')
+        return { error: { message: 'No user email found' } as AuthError }
+      }
+
+      console.log('AuthContext: Attempting to resend confirmation email to:', user.email)
+      console.log('AuthContext: User email_confirmed_at:', user.email_confirmed_at)
+
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: user.email,
+      })
+
+      if (error) {
+        console.error('AuthContext: Supabase resend error:', error)
+      } else {
+        console.log('AuthContext: Resend request successful - check Supabase Auth logs for delivery status')
+      }
+
+      return { error }
+    } catch (error) {
+      console.error('AuthContext: Exception in resendConfirmationEmail:', error)
+      return { error: error as AuthError }
+    }
+  }
+
+  const confirmEmail = async (token: string) => {
+    try {
+      console.log('AuthContext: Starting email confirmation process...')
+      
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: token,
+        type: 'email'
+      })
+
+      if (error) {
+        console.error('AuthContext: Email verification failed:', error)
+        return { error }
+      }
+
+      console.log('AuthContext: Email verification successful, updating profile...')
+
+      // Get fresh user data after confirmation
+      const { data: { user: confirmedUser }, error: userError } = await supabase.auth.getUser()
+      
+      if (userError || !confirmedUser) {
+        console.error('AuthContext: Failed to get confirmed user:', userError)
+        return { error: userError }
+      }
+
+      // Update our profiles table to match the auth.users confirmation status
+      const { error: profileError } = await updateProfile({
+        email_confirmed: true,
+        email_confirmed_at: confirmedUser.email_confirmed_at || new Date().toISOString()
+      })
+
+      if (profileError) {
+        console.error('AuthContext: Failed to update profile confirmation status:', profileError)
+        // Don't return error here - the auth confirmation still succeeded
+      }
+
+      // Refresh the user and profile state
+      setUser(confirmedUser)
+      
+      // Fetch fresh profile data
+      if (confirmedUser.id) {
+        console.log('AuthContext: Fetching fresh profile data after confirmation...')
+        await fetchUserProfile(confirmedUser.id)
+      }
+
+      console.log('AuthContext: Email confirmation process completed successfully')
+      return { error: null }
+    } catch (error) {
+      console.error('AuthContext: Exception in confirmEmail:', error)
+      return { error: error as AuthError }
+    }
+  }
+
   const value: AuthContextType = {
     user,
     profile,
@@ -237,6 +367,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signInWithGoogle,
     signOut,
     updateProfile,
+    resendConfirmationEmail,
+    confirmEmail,
   }
 
   return (

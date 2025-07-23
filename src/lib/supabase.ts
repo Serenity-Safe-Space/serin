@@ -17,6 +17,9 @@ export interface UserProfile {
   email: string
   full_name: string | null
   avatar_url: string | null
+  nickname: string | null
+  email_confirmed: boolean
+  email_confirmed_at: string | null
   created_at: string
   updated_at: string
 }

@@ -13,6 +13,7 @@ import Feed from "./pages/Feed";
 import Communities from "./pages/Communities";
 import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
+import EmailConfirmation from "./pages/EmailConfirmation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<SignUp />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/confirm-email" element={<EmailConfirmation />} />
               <Route 
                 path="/chat" 
                 element={
