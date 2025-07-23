@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy, MessageCircle, ArrowLeft, Bot, Instagram, Mail } from 'lucide-react';
+import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy, MessageCircle, ArrowLeft, Bot, Instagram, Mail, LogOut } from 'lucide-react';
 import PeerMatchingInterface from '@/components/PeerMatchingInterface';
 import GroupChatInterface from '@/components/GroupChatInterface';
 import ProfileView from '@/components/ProfileView';
@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/hooks/useAppState';
 import RecommendationCard from '@/components/RecommendationCard';
 import { useConversation } from '@11labs/react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Message {
   id: string;
@@ -34,6 +35,7 @@ const Chat = () => {
     completeWelcome
   } = useAppState();
   const navigate = useNavigate();
+  const { signOut, user, profile } = useAuth();
 
   const [allMessages, setAllMessages] = useState<Message[]>([
     {
@@ -722,6 +724,22 @@ const Chat = () => {
                   Contact Us
                 </Button>
               </div>
+
+              {/* Logout Button */}
+              <Button
+                variant="outline"
+                className="w-full py-3 rounded-full border-red-300 text-red-600 hover:bg-red-50"
+                onClick={async () => {
+                  const { error } = await signOut();
+                  if (!error) {
+                    setShowProfileModal(false);
+                    navigate('/');
+                  }
+                }}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
             </div>
           </div>
         </DialogContent>

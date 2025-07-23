@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import OfflineEncouragement from "@/components/OfflineEncouragement";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import SignUp from "./pages/SignUp";
 import Auth from "./pages/Auth";
 import Feed from "./pages/Feed";
@@ -18,23 +20,53 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="serin-ui-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <OfflineEncouragement />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<SignUp />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/feed" element={<Feed />} />
-            <Route path="/communities" element={<Communities />} />
-            <Route path="/profile" element={<Profile />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <OfflineEncouragement />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<SignUp />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route 
+                path="/chat" 
+                element={
+                  <ProtectedRoute>
+                    <Chat />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/feed" 
+                element={
+                  <ProtectedRoute>
+                    <Feed />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/communities" 
+                element={
+                  <ProtectedRoute>
+                    <Communities />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } 
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
