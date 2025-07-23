@@ -24,17 +24,17 @@ interface Message {
 }
 
 const Chat = () => {
-  const { 
-    appState, 
-    enableFeature, 
+  const {
+    appState,
+    enableFeature,
     addRecommendation,
     removeRecommendation,
     updateEmotionalReadiness,
-    incrementConversation, 
-    completeWelcome 
+    incrementConversation,
+    completeWelcome
   } = useAppState();
   const navigate = useNavigate();
-  
+
   const [allMessages, setAllMessages] = useState<Message[]>([
     {
       id: '1',
@@ -44,7 +44,7 @@ const Chat = () => {
       type: 'welcome'
     }
   ]);
-  
+
   const [currentMessage, setCurrentMessage] = useState<Message | null>(allMessages[0]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
@@ -61,6 +61,7 @@ const Chat = () => {
   const [showGroupChat, setShowGroupChat] = useState(false);
   const [showProfileView, setShowProfileView] = useState(false);
   const [chatMode, setChatMode] = useState<'ai' | 'peer'>('ai'); // Track current chat mode
+  const [welcomeTextVariant, setWelcomeTextVariant] = useState(0); // 0 for main, 1 for variant
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Voice conversation with ElevenLabs
@@ -79,10 +80,10 @@ const Chat = () => {
   // Typing effect
   useEffect(() => {
     if (!currentMessage) return;
-    
+
     setDisplayedText('');
     setIsTyping(true);
-    
+
     let i = 0;
     const typingInterval = setInterval(() => {
       if (i < currentMessage.content.length) {
@@ -107,6 +108,15 @@ const Chat = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Randomly switch welcome text variant
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWelcomeTextVariant(prev => Math.random() > 0.7 ? (prev === 0 ? 1 : 0) : prev);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const sendMessage = () => {
     if (!newMessage.trim() || !isUserTurn) return;
 
@@ -126,7 +136,7 @@ const Chat = () => {
     setTimeout(() => {
       const conversationCount = allMessages.filter(m => m.sender === 'user').length + 1;
       const botResponse = getBotResponse(newMessage, conversationCount);
-      
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: botResponse.response,
@@ -155,7 +165,7 @@ const Chat = () => {
 
   const getBotResponse = (userMessage: string, conversationCount: number): { response: string; shouldRecommend: boolean; recommendationType?: any } => {
     const lowerMsg = userMessage.toLowerCase();
-    
+
     // Supportive responses based on emotional cues
     if (lowerMsg.includes('sad') || lowerMsg.includes('down') || lowerMsg.includes('depressed')) {
       if (conversationCount >= 3) {
@@ -310,7 +320,7 @@ const Chat = () => {
   const handleChoiceClick = (choice: string) => {
     setSelectedChoice(choice);
     setShowOnboarding(false);
-    
+
     if (choice === "I want to connect with peers") {
       setShowPeerMatching(true);
     } else {
@@ -366,7 +376,7 @@ const Chat = () => {
   // Show peer matching interface
   if (showPeerMatching) {
     return (
-      <PeerMatchingInterface 
+      <PeerMatchingInterface
         onClose={handleCloseAll}
         onBeginChat={handleBeginChat}
         onChatHistory={handleChatHistory}
@@ -390,9 +400,9 @@ const Chat = () => {
             <Bot className="w-5 h-5" />
             <span>AI Chat</span>
           </Button>
-          
+
           <h2 className="text-lg font-semibold text-purple-900">Peer Chat</h2>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -402,7 +412,7 @@ const Chat = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </div>
-        
+
         <GroupChatInterface onClose={handleCloseAll} />
       </div>
     );
@@ -414,7 +424,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-100/50 via-purple-50/30 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Floating profile avatar - always visible */}
       <motion.div
         className="fixed top-6 right-6 z-50"
@@ -445,7 +455,7 @@ const Chat = () => {
         /* Welcome Screen matching the uploaded image */
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-12">
           {/* Purple smiley avatar with glow */}
-          <motion.div 
+          <motion.div
             className="flex flex-col items-center space-y-8"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -456,65 +466,82 @@ const Chat = () => {
               {/* Glow effect background */}
               <div className="absolute inset-0 w-40 h-40 rounded-full bg-gradient-to-br from-purple-300 to-purple-400 blur-2xl scale-110 opacity-60"></div>
               <div className="relative w-40 h-40 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-2xl overflow-hidden">
-                <img 
-                  src="/lovable-uploads/2f5d5174-f2f2-424d-b6d9-61b81c9bca6b.png" 
+                <img
+                  src="/lovable-uploads/2f5d5174-f2f2-424d-b6d9-61b81c9bca6b.png"
                   alt="Llama avatar"
                   className="w-36 h-36 object-cover rounded-full"
                 />
               </div>
             </div>
-            
+
             {/* Welcome Text */}
-            <motion.div 
+            <motion.div
               className="text-center space-y-4 max-w-sm"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <h1 className="text-3xl font-bold text-purple-900 leading-tight">
-                Hey, nice to meet you.<br />
-                I'm here to help you<br />
-                have the life you<br />
-                really want!
-              </h1>
+              <motion.h1
+                className="text-3xl font-bold text-slate-800 leading-tight"
+                key={welcomeTextVariant}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                {welcomeTextVariant === 0 ? (
+                  <>
+                    Hey, I'm Serin 👋<br />
+                    <span className="text-2xl font-medium">
+                      Let's make life feel better, together.
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Here for your feels 💜<br />
+                    <span className="text-2xl font-medium">
+                      Let's make life feel better, together.
+                    </span>
+                  </>
+                )}
+              </motion.h1>
             </motion.div>
           </motion.div>
 
           {/* Choice Buttons */}
-          <motion.div 
+          <motion.div
             className="flex flex-col space-y-4 w-full max-w-sm"
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
-            {/* Choice 1 - Light purple/white */}
+            {/* Choice 1 - Light gray/white */}
             <motion.button
-              onClick={() => handleChoiceClick("I don't feel good")}
-              className="w-full py-4 px-6 bg-white/80 hover:bg-white text-gray-700 rounded-full text-lg font-medium transition-colors shadow-lg border border-purple-100"
+              onClick={() => handleChoiceClick("I'm not doing great")}
+              className="w-full py-4 px-6 bg-gray-100 hover:bg-gray-200 text-slate-700 rounded-full text-lg font-medium transition-colors shadow-lg"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              I don't feel good
+              I'm not doing great
             </motion.button>
 
-            {/* Choice 2 - Yellow */}
+            {/* Choice 2 - Bright Yellow */}
             <motion.button
-              onClick={() => handleChoiceClick("I want to connect with peers")}
-              className="w-full py-4 px-6 bg-yellow-200 hover:bg-yellow-300 text-gray-800 rounded-full text-lg font-medium transition-colors shadow-lg"
+              onClick={() => handleChoiceClick("Talk to someone like me")}
+              className="w-full py-4 px-6 bg-yellow-300 hover:bg-yellow-400 text-slate-700 rounded-full text-lg font-medium transition-colors shadow-lg"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              I want to connect with peers
+              Talk to someone like me
             </motion.button>
 
-            {/* Choice 3 - Pink */}
+            {/* Choice 3 - Light Pink */}
             <motion.button
-              onClick={() => handleChoiceClick("Something else")}
-              className="w-full py-4 px-6 bg-pink-200 hover:bg-pink-300 text-gray-800 rounded-full text-lg font-medium transition-colors shadow-lg"
+              onClick={() => handleChoiceClick("Something else...")}
+              className="w-full py-4 px-6 bg-pink-200 hover:bg-pink-300 text-slate-700 rounded-full text-lg font-medium transition-colors shadow-lg"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Something else
+              Something else...
             </motion.button>
           </motion.div>
         </div>
@@ -605,7 +632,7 @@ const Chat = () => {
           <DialogHeader>
             <DialogTitle className="text-center text-2xl font-bold text-purple-900 mb-4">Your Profile</DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-6">
             {/* Profile Avatar */}
             <div className="flex justify-center">
@@ -631,7 +658,7 @@ const Chat = () => {
                   <div className="text-xs text-gray-600">Days Active</div>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto">
                   <Heart className="w-6 h-6 text-green-600" />
@@ -641,7 +668,7 @@ const Chat = () => {
                   <div className="text-xs text-gray-600">Check-ins</div>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto">
                   <Trophy className="w-6 h-6 text-yellow-600" />
@@ -655,7 +682,7 @@ const Chat = () => {
 
             {/* Quick Actions */}
             <div className="space-y-3">
-              <Button 
+              <Button
                 className="w-full bg-purple-500 hover:bg-purple-600 text-white"
                 onClick={() => {
                   setShowProfileModal(false);
@@ -665,10 +692,10 @@ const Chat = () => {
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Chat Messages
               </Button>
-              
+
               <div className="grid grid-cols-2 gap-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="text-purple-600 border-purple-200 hover:bg-purple-50"
                   onClick={() => {
                     setShowProfileModal(false);
@@ -678,7 +705,7 @@ const Chat = () => {
                   <Users className="h-4 w-4 mr-1" />
                   Communities
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   className="text-purple-600 border-purple-200 hover:bg-purple-50"
                   onClick={() => {
