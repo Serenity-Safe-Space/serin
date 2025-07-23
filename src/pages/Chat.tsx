@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy, MessageCircle, ArrowLeft, Bot } from 'lucide-react';
+import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy, MessageCircle, ArrowLeft, Bot, Instagram, Mail } from 'lucide-react';
 import PeerMatchingInterface from '@/components/PeerMatchingInterface';
 import GroupChatInterface from '@/components/GroupChatInterface';
 import ProfileView from '@/components/ProfileView';
@@ -649,9 +649,9 @@ const Chat = () => {
 
       {/* Profile Modal */}
       <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
-        <DialogContent className="max-w-md mx-auto bg-gradient-to-br from-purple-50 to-white">
+        <DialogContent className="max-w-md mx-auto bg-white">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl font-bold text-purple-900 mb-4">Your Profile</DialogTitle>
+            <DialogTitle className="text-center text-2xl font-bold text-slate-800 mb-4">Your Profile</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-6">
@@ -669,74 +669,81 @@ const Chat = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-6 text-center">
               <div className="space-y-2">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
                   <Calendar className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-gray-800">3</div>
-                  <div className="text-xs text-gray-600">Days Active</div>
+                  <div className="text-xl font-bold text-gray-800">4</div>
+                  <div className="text-sm text-gray-600">Days Active</div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                   <Heart className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-gray-800">24</div>
-                  <div className="text-xs text-gray-600">Check-ins</div>
+                  <div className="text-xl font-bold text-gray-800">38</div>
+                  <div className="text-sm text-gray-600">Check-ins</div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
                   <Trophy className="w-6 h-6 text-yellow-600" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-gray-800">2</div>
-                  <div className="text-xs text-gray-600">Achievements</div>
+                  <div className="text-xl font-bold text-gray-800">4</div>
+                  <div className="text-sm text-gray-600">Achievements</div>
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions */}
+            {/* Action Buttons */}
             <div className="space-y-3">
               <Button
-                className="w-full bg-purple-500 hover:bg-purple-600 text-white"
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white py-3 rounded-full"
                 onClick={() => {
                   setShowProfileModal(false);
                   setShowChatInterface(true);
                 }}
               >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Chat Messages
+                Chat History
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full py-3 rounded-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                onClick={() => {
+                  console.log('Instagram clicked');
+                }}
+              >
+                Instagram
               </Button>
 
               <div className="grid grid-cols-2 gap-3">
                 <Button
                   variant="outline"
-                  className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                  className="py-3 rounded-full border-gray-300 text-gray-700 hover:bg-gray-50"
                   onClick={() => {
                     setShowProfileModal(false);
-                    navigate('/communities');
-                  }}
-                >
-                  <Users className="h-4 w-4 mr-1" />
-                  Communities
-                </Button>
-                <Button
-                  variant="outline"
-                  className="text-purple-600 border-purple-200 hover:bg-purple-50"
-                  onClick={() => {
-                    setShowProfileModal(false);
-                    // Handle settings action
                     console.log('Settings clicked');
                   }}
                 >
                   <Settings className="h-4 w-4 mr-1" />
                   Settings
+                </Button>
+                <Button
+                  variant="outline"
+                  className="py-3 rounded-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                  onClick={() => {
+                    console.log('Contact Us clicked');
+                  }}
+                >
+                  <Mail className="h-4 w-4 mr-1" />
+                  Contact Us
                 </Button>
               </div>
             </div>
