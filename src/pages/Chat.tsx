@@ -1,9 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Send, Heart, Smile, Sparkles, User, History, Users, Mic, MicOff, Settings, Star, Calendar, Trophy, MessageCircle, ArrowLeft, Bot, Instagram, Mail, LogOut, Edit } from 'lucide-react';
 import PeerMatchingInterface from '@/components/PeerMatchingInterface';
@@ -12,18 +9,11 @@ import ProfileView from '@/components/ProfileView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/hooks/useAppState';
-import RecommendationCard from '@/components/RecommendationCard';
 import { useConversation } from '@11labs/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { validateNickname } from '@/utils/nicknameGenerator';
+import geminiService from '@/services/geminiService';
 
-interface Message {
-  id: string;
-  content: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-  type?: 'welcome' | 'mood-check' | 'recommendation' | 'support' | 'chat';
-}
 
 const Chat = () => {
   const {
@@ -38,23 +28,11 @@ const Chat = () => {
   const navigate = useNavigate();
   const { signOut, user, profile, updateProfile, resendConfirmationEmail } = useAuth();
 
-  const [allMessages, setAllMessages] = useState<Message[]>([
-    {
-      id: '1',
-      content: "Hello, beautiful soul. 🌸 I'm Serin, your personal wellness companion. This is your safe space - a place where you can be completely yourself. How are you feeling today?",
-      sender: 'bot',
-      timestamp: new Date(Date.now() - 60000),
-      type: 'welcome'
-    }
-  ]);
-
-  const [currentMessage, setCurrentMessage] = useState<Message | null>(allMessages[0]);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const [displayedText, setDisplayedText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [currentDisplayText, setCurrentDisplayText] = useState("Gotchu. Let's talk.\nMood's all yours – spill it");
+  const [isGeneratingResponse, setIsGeneratingResponse] = useState(false);
   const [newMessage, setNewMessage] = useState('');
-  const [message, setMessage] = useState('');
-  const [isUserTurn, setIsUserTurn] = useState(false);
+  const [isUserTurn, setIsUserTurn] = useState(true);
+  const [conversationStarted, setConversationStarted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [showChatInterface, setShowChatInterface] = useState(false);
@@ -68,7 +46,6 @@ const Chat = () => {
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [editedNickname, setEditedNickname] = useState('');
   const [isResendingEmail, setIsResendingEmail] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Voice conversation with ElevenLabs
   const conversation = useConversation({
@@ -83,27 +60,12 @@ const Chat = () => {
     onError: (error) => console.error('Voice error:', error)
   });
 
-  // Typing effect
+  // Initialize with Serin's greeting
   useEffect(() => {
-    if (!currentMessage) return;
-
-    setDisplayedText('');
-    setIsTyping(true);
-
-    let i = 0;
-    const typingInterval = setInterval(() => {
-      if (i < currentMessage.content.length) {
-        setDisplayedText(currentMessage.content.slice(0, i + 1));
-        i++;
-      } else {
-        setIsTyping(false);
-        setIsUserTurn(true);
-        clearInterval(typingInterval);
-      }
-    }, 30);
-
-    return () => clearInterval(typingInterval);
-  }, [currentMessage]);
+    if (!conversationStarted) {
+      setCurrentDisplayText(geminiService.getInitialMessage());
+    }
+  }, [conversationStarted]);
 
   // Auto-hide onboarding after 5 seconds
   useEffect(() => {
@@ -123,166 +85,49 @@ const Chat = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const sendMessage = () => {
-    if (!newMessage.trim() || !isUserTurn) return;
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !isUserTurn || isGeneratingResponse) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: newMessage,
-      sender: 'user',
-      timestamp: new Date(),
-      type: 'chat'
-    };
-
-    setAllMessages(prev => [...prev, userMessage]);
+    const userMessageText = newMessage;
     setNewMessage('');
     setIsUserTurn(false);
+    setIsGeneratingResponse(true);
+    setConversationStarted(true);
 
-    // Get bot response
-    setTimeout(() => {
-      const conversationCount = allMessages.filter(m => m.sender === 'user').length + 1;
-      const botResponse = getBotResponse(newMessage, conversationCount);
+    // Show user message while generating response
+    setCurrentDisplayText(userMessageText);
 
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: botResponse.response,
-        sender: 'bot',
-        timestamp: new Date(),
-        type: botResponse.shouldRecommend ? 'recommendation' : 'support'
-      };
-
-      setAllMessages(prev => [...prev, botMessage]);
-      setCurrentMessage(botMessage);
-      setCurrentMessageIndex(prev => prev + 2);
-
-      // Handle recommendations
-      if (botResponse.shouldRecommend && botResponse.recommendationType) {
-        addRecommendation({
-          type: botResponse.recommendationType.type,
-          title: botResponse.recommendationType.title,
-          description: botResponse.recommendationType.description
-        });
+    try {
+      // Get bot response from Gemini
+      const botResponse = await geminiService.sendMessage(userMessageText);
+      
+      // Show bot response
+      setCurrentDisplayText(botResponse);
+      
+      // Check if we should unlock features based on conversation length
+      const conversationLength = geminiService.getConversationLength();
+      if (conversationLength >= 3) {
+        updateEmotionalReadiness('forSharing', true);
       }
-
+      if (conversationLength >= 5) {
+        enableFeature('feed');
+      }
+      if (conversationLength >= 7) {
+        enableFeature('communities');
+      }
+      
       incrementConversation();
-      updateEmotionalReadiness('forSharing', true);
-    }, 1500);
-  };
-
-  const getBotResponse = (userMessage: string, conversationCount: number): { response: string; shouldRecommend: boolean; recommendationType?: any } => {
-    const lowerMsg = userMessage.toLowerCase();
-
-    // Supportive responses based on emotional cues
-    if (lowerMsg.includes('sad') || lowerMsg.includes('down') || lowerMsg.includes('depressed')) {
-      if (conversationCount >= 3) {
-        return {
-          response: "I hear the sadness in your words, and I want you to know that your feelings are completely valid. Sometimes connecting with others who understand can help. Would you like me to help you find a supportive community?",
-          shouldRecommend: true,
-          recommendationType: {
-            type: 'communities',
-            title: 'Find Your Supportive Circle',
-            description: 'Connect with others who understand your journey',
-            feature: 'communities'
-          }
-        };
-      }
-      return {
-        response: "I hear you, and I want you to know that feeling sad is a natural part of the human experience. You're not alone in this. What's been weighing on your heart lately?",
-        shouldRecommend: false
-      };
-    }
-
-    if (lowerMsg.includes('anxious') || lowerMsg.includes('worried') || lowerMsg.includes('stressed')) {
-      if (conversationCount >= 2) {
-        return {
-          response: "Anxiety can feel overwhelming, but you're taking a brave step by sharing this with me. Would you like to see some stories from others who've walked a similar path? Sometimes knowing we're not alone can bring comfort.",
-          shouldRecommend: true,
-          recommendationType: {
-            type: 'feed',
-            title: 'Stories of Hope & Healing',
-            description: 'Read experiences from others on similar journeys',
-            feature: 'feed'
-          }
-        };
-      }
-      return {
-        response: "Anxiety can feel so heavy sometimes. Thank you for trusting me with this. Let's take this one moment at a time. What's making you feel most anxious right now?",
-        shouldRecommend: false
-      };
-    }
-
-    if (lowerMsg.includes('better') || lowerMsg.includes('good') || lowerMsg.includes('happy')) {
-      if (conversationCount >= 4) {
-        return {
-          response: "I'm so glad to hear you're feeling better! 🌸 Your growth journey is beautiful to witness. Would you like to see your progress and celebrate how far you've come?",
-          shouldRecommend: true,
-          recommendationType: {
-            type: 'profile',
-            title: 'Celebrate Your Growth',
-            description: 'See your wellness journey and achievements',
-            feature: 'profile'
-          }
-        };
-      }
-      return {
-        response: "That's wonderful to hear! Your resilience is truly inspiring. What's been helping you feel better today?",
-        shouldRecommend: false
-      };
-    }
-
-    if (lowerMsg.includes('lonely') || lowerMsg.includes('alone') || lowerMsg.includes('isolated')) {
-      return {
-        response: "Feeling lonely can be one of the most difficult emotions to carry. But right here, right now, you're not alone - I'm here with you. And there are others who would understand exactly how you're feeling.",
-        shouldRecommend: conversationCount >= 2,
-        recommendationType: conversationCount >= 2 ? {
-          type: 'communities',
-          title: 'You\'re Not Alone',
-          description: 'Connect with a caring community',
-          feature: 'communities'
-        } : undefined
-      };
-    }
-
-    // Default supportive responses
-    const responses = [
-      "Thank you for sharing that with me. Your openness takes courage, and I'm honored you trust me with your thoughts.",
-      "I'm here to listen without judgment. Every feeling you have is valid and deserves to be heard.",
-      "You're being so brave by reaching out and talking about what's in your heart. How are you taking care of yourself today?",
-      "Your journey is unique and valuable. I'm grateful you're letting me be part of it, even in this small way."
-    ];
-
-    return {
-      response: responses[Math.floor(Math.random() * responses.length)],
-      shouldRecommend: false
-    };
-  };
-
-  const navigateMessages = (direction: 'prev' | 'next') => {
-    if (direction === 'prev' && currentMessageIndex > 0) {
-      const newIndex = currentMessageIndex - 1;
-      setCurrentMessageIndex(newIndex);
-      setCurrentMessage(allMessages[newIndex]);
-    } else if (direction === 'next' && currentMessageIndex < allMessages.length - 1) {
-      const newIndex = currentMessageIndex + 1;
-      setCurrentMessageIndex(newIndex);
-      setCurrentMessage(allMessages[newIndex]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setCurrentDisplayText("Sorry, I'm having trouble right now. Can you try again? 😊");
+    } finally {
+      setIsGeneratingResponse(false);
+      setIsUserTurn(true);
     }
   };
 
-  const getMessageBadge = (type?: string) => {
-    switch (type) {
-      case 'welcome':
-        return <Badge variant="outline" className="bg-gradient-wellness text-wellness-foreground border-0 mb-2">Welcome</Badge>;
-      case 'mood-check':
-        return <Badge variant="outline" className="bg-gradient-primary text-primary-foreground border-0 mb-2">Mood Check</Badge>;
-      case 'recommendation':
-        return <Badge variant="outline" className="bg-gradient-secondary text-secondary-foreground border-0 mb-2">Suggestion</Badge>;
-      case 'support':
-        return <Badge variant="outline" className="bg-gradient-warm text-primary-foreground border-0 mb-2">Support</Badge>;
-      default:
-        return null;
-    }
-  };
+
+
 
   const handleAcceptRecommendation = (id: string, type: string) => {
     enableFeature(type as any);
@@ -311,12 +156,6 @@ const Chat = () => {
     }
   };
 
-  const showChatHistory = () => {
-    // For now, this navigates through existing messages
-    if (currentMessageIndex > 0) {
-      navigateMessages('prev');
-    }
-  };
 
   const showChatHistoryFunc = () => {
     // This would open group chat functionality
@@ -623,19 +462,23 @@ const Chat = () => {
 
           {/* Centered content */}
           <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 space-y-8">
-            {/* Welcome text */}
+            {/* Current message display */}
             <motion.div
-              className="text-center space-y-4 max-w-md"
+              className="text-center space-y-4 max-w-md min-h-[120px] flex items-center justify-center"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <h1 className="text-3xl font-bold text-slate-800 leading-tight">
-                Gotchu. Let's talk.
-              </h1>
-              <h2 className="text-3xl font-bold text-slate-800 leading-tight">
-                Mood's all yours – spill it
-              </h2>
+              <div className="text-3xl font-bold text-slate-800 leading-tight whitespace-pre-line">
+                {isGeneratingResponse ? (
+                  <div className="flex items-center space-x-2">
+                    <span>Thinking...</span>
+                    <div className="animate-spin h-6 w-6 border-2 border-purple-500 border-t-transparent rounded-full"></div>
+                  </div>
+                ) : (
+                  currentDisplayText
+                )}
+              </div>
             </motion.div>
 
             {/* Input area */}
@@ -657,7 +500,7 @@ const Chat = () => {
                   onClick={sendMessage}
                   size="sm"
                   className="w-10 h-10 rounded-full bg-purple-500 hover:bg-purple-600 text-white p-0 shrink-0"
-                  disabled={!isUserTurn || !newMessage.trim()}
+                  disabled={!isUserTurn || !newMessage.trim() || isGeneratingResponse}
                 >
                   <Send className="w-4 h-4" />
                 </Button>
