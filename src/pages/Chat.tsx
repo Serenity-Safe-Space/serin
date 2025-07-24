@@ -60,10 +60,22 @@ const Chat = () => {
     onError: (error) => console.error('Voice error:', error)
   });
 
-  // Initialize with Serin's greeting
+  // Initialize with Serin's greeting and check service health
   useEffect(() => {
     if (!conversationStarted) {
-      setCurrentDisplayText(geminiService.getInitialMessage());
+      try {
+        if (!geminiService) {
+          throw new Error('GeminiService not available');
+        }
+        const initialMessage = geminiService.getInitialMessage();
+        setCurrentDisplayText(initialMessage);
+        console.log('Chat: GeminiService initialized successfully');
+      } catch (error) {
+        console.error('Chat: Failed to initialize GeminiService:', error);
+        setCurrentDisplayText(
+          "⚠️ Configuration Error: Unable to start AI service. Please check environment variables in Vercel dashboard and refresh the page."
+        );
+      }
     }
   }, [conversationStarted]);
 
@@ -110,6 +122,9 @@ const Chat = () => {
     console.log('Chat.sendMessage: Set display text to user message');
 
     try {
+      if (!geminiService) {
+        throw new Error('GeminiService not available - check environment variables');
+      }
       console.log('Chat.sendMessage: Calling geminiService...');
       // Get bot response from Gemini
       const botResponse = await geminiService.sendMessage(userMessageText);

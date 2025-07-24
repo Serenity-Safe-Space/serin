@@ -15,12 +15,33 @@ class GeminiService {
   private conversationHistory: ConversationHistory;
 
   constructor() {
+    // Enhanced environment variable debugging
+    console.log('GeminiService: Environment check:', {
+      isDevelopment: import.meta.env.DEV,
+      isProduction: import.meta.env.PROD,
+      mode: import.meta.env.MODE,
+      hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
+      allEnvVars: Object.keys(import.meta.env).filter(key => key.startsWith('VITE_'))
+    });
+    
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    console.log('GeminiService: Initializing with API key present:', !!apiKey);
+    console.log('GeminiService: API key status:', {
+      present: !!apiKey,
+      length: apiKey ? apiKey.length : 0,
+      startsCorrectly: apiKey ? apiKey.startsWith('AI') : false,
+      firstChars: apiKey ? apiKey.substring(0, 10) + '...' : 'null'
+    });
     
     if (!apiKey) {
-      console.error('GeminiService: VITE_GEMINI_API_KEY is not configured');
-      throw new Error('VITE_GEMINI_API_KEY is not configured');
+      const errorMsg = 'VITE_GEMINI_API_KEY is not configured. Please check Vercel environment variables.';
+      console.error('GeminiService:', errorMsg);
+      throw new Error(errorMsg);
+    }
+    
+    if (apiKey.length < 20) {
+      const errorMsg = 'VITE_GEMINI_API_KEY appears to be invalid (too short). Please check the key value.';
+      console.error('GeminiService:', errorMsg);
+      throw new Error(errorMsg);
     }
     
     try {
@@ -28,7 +49,7 @@ class GeminiService {
       // Use the correct Gemini 1.5 Flash model (2.5 Flash is not yet available)
       this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
       this.conversationHistory = { messages: [] };
-      console.log('GeminiService: Successfully initialized');
+      console.log('GeminiService: Successfully initialized with model gemini-1.5-flash');
     } catch (error) {
       console.error('GeminiService: Error during initialization:', error);
       throw error;
