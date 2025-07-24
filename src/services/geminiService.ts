@@ -16,13 +16,23 @@ class GeminiService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    console.log('GeminiService: Initializing with API key present:', !!apiKey);
+    
     if (!apiKey) {
+      console.error('GeminiService: VITE_GEMINI_API_KEY is not configured');
       throw new Error('VITE_GEMINI_API_KEY is not configured');
     }
     
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
-    this.conversationHistory = { messages: [] };
+    try {
+      this.genAI = new GoogleGenerativeAI(apiKey);
+      // Use the correct Gemini 1.5 Flash model (2.5 Flash is not yet available)
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      this.conversationHistory = { messages: [] };
+      console.log('GeminiService: Successfully initialized');
+    } catch (error) {
+      console.error('GeminiService: Error during initialization:', error);
+      throw error;
+    }
   }
 
   private getSerinPrompt(history: string, currentMessage: string): string {
@@ -124,30 +134,45 @@ ${currentMessage}`;
   }
 
   async sendMessage(userMessage: string): Promise<string> {
+    console.log('GeminiService.sendMessage: Starting with message:', userMessage);
+    
     try {
       // Add user message to history
       this.conversationHistory.messages.push({
         role: 'user',
         parts: userMessage
       });
+      console.log('GeminiService: Added user message to history. Total messages:', this.conversationHistory.messages.length);
 
       const conversationHistoryText = this.formatConversationHistory();
       const prompt = this.getSerinPrompt(conversationHistoryText, userMessage);
+      console.log('GeminiService: Generated prompt length:', prompt.length);
 
       // Generate response
+      console.log('GeminiService: Calling Gemini API...');
       const result = await this.model.generateContent(prompt);
+      console.log('GeminiService: Received result from API');
+      
       const response = await result.response;
       const responseText = response.text();
+      console.log('GeminiService: Response text length:', responseText.length);
 
       // Add bot response to history
       this.conversationHistory.messages.push({
         role: 'model',
         parts: responseText
       });
+      console.log('GeminiService: Added bot response to history');
 
       return responseText;
     } catch (error) {
-      console.error('Gemini API error:', error);
+      console.error('GeminiService: Detailed error:', {
+        message: error.message,
+        status: error.status,
+        statusText: error.statusText,
+        stack: error.stack,
+        error: error
+      });
       
       // Fallback response based on language
       const language = this.detectLanguage(userMessage);
@@ -155,6 +180,7 @@ ${currentMessage}`;
         ? "Désolée, j'ai un petit problème technique. Peux-tu réessayer dans un moment? 😊"
         : "Sorry, I'm having a technical hiccup. Can you try again in a moment? 😊";
       
+      console.log('GeminiService: Returning fallback message in', language);
       return fallbackMessage;
     }
   }

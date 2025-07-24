@@ -86,9 +86,20 @@ const Chat = () => {
   }, []);
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !isUserTurn || isGeneratingResponse) return;
+    console.log('Chat.sendMessage: Starting with:', { 
+      messageLength: newMessage.trim().length, 
+      isUserTurn, 
+      isGeneratingResponse 
+    });
+    
+    if (!newMessage.trim() || !isUserTurn || isGeneratingResponse) {
+      console.log('Chat.sendMessage: Blocked - conditions not met');
+      return;
+    }
 
     const userMessageText = newMessage;
+    console.log('Chat.sendMessage: Processing message:', userMessageText);
+    
     setNewMessage('');
     setIsUserTurn(false);
     setIsGeneratingResponse(true);
@@ -96,16 +107,22 @@ const Chat = () => {
 
     // Show user message while generating response
     setCurrentDisplayText(userMessageText);
+    console.log('Chat.sendMessage: Set display text to user message');
 
     try {
+      console.log('Chat.sendMessage: Calling geminiService...');
       // Get bot response from Gemini
       const botResponse = await geminiService.sendMessage(userMessageText);
+      console.log('Chat.sendMessage: Received bot response:', botResponse.substring(0, 100) + '...');
       
       // Show bot response
       setCurrentDisplayText(botResponse);
+      console.log('Chat.sendMessage: Updated display with bot response');
       
       // Check if we should unlock features based on conversation length
       const conversationLength = geminiService.getConversationLength();
+      console.log('Chat.sendMessage: Conversation length:', conversationLength);
+      
       if (conversationLength >= 3) {
         updateEmotionalReadiness('forSharing', true);
       }
@@ -117,12 +134,14 @@ const Chat = () => {
       }
       
       incrementConversation();
+      console.log('Chat.sendMessage: Completed successfully');
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Chat.sendMessage: Error occurred:', error);
       setCurrentDisplayText("Sorry, I'm having trouble right now. Can you try again? 😊");
     } finally {
       setIsGeneratingResponse(false);
       setIsUserTurn(true);
+      console.log('Chat.sendMessage: Reset states');
     }
   };
 
@@ -492,7 +511,7 @@ const Chat = () => {
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                   placeholder="Say anything... I'm listening"
                   className="flex-1 border-none bg-transparent text-gray-700 placeholder-gray-400 focus:ring-0 text-base"
                 />
