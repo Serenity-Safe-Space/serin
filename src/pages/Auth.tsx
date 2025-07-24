@@ -1,163 +1,189 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Heart, Sparkles } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<'login' | 'signup' | 'onboarding'>('login');
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    username: '',
-    interests: '',
-    goals: '',
-    mood: ''
-  });
+  const { user, loading } = useAuth();
+  const [authStatus, setAuthStatus] = useState<'processing' | 'success' | 'error'>('processing');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const handleAuth = () => {
-    if (step === 'signup') {
-      setStep('onboarding');
-    } else {
-      navigate('/feed');
+  useEffect(() => {
+    const handleAuthCallback = async () => {
+      console.log('Auth: Starting OAuth callback processing...');
+      
+      try {
+        // Check if we have auth tokens in the URL hash
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        console.log('Auth: Hash params check:', {
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!refreshToken,
+          hashLength: window.location.hash.length
+        });
+
+        if (accessToken && refreshToken) {
+          console.log('Auth: Found tokens in hash, processing...');
+          
+          // Set the session using the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+
+          if (error) {
+            console.error('Auth: Error setting session:', error);
+            setAuthStatus('error');
+            setErrorMessage(`Authentication failed: ${error.message}`);
+            return;
+          }
+
+          console.log('Auth: Session set successfully:', data);
+          setAuthStatus('success');
+          
+          // Clear the hash from URL
+          window.history.replaceState(null, '', window.location.pathname);
+          
+          // Wait a moment for auth context to update, then redirect
+          setTimeout(() => {
+            console.log('Auth: Redirecting to chat...');
+            navigate('/chat');
+          }, 1000);
+          
+        } else {
+          // No tokens in hash - check if user is already authenticated
+          console.log('Auth: No tokens in hash, checking existing session...');
+          
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error('Auth: Error checking session:', error);
+            setAuthStatus('error');
+            setErrorMessage(`Session check failed: ${error.message}`);
+            return;
+          }
+
+          if (session) {
+            console.log('Auth: Existing session found, redirecting...');
+            setAuthStatus('success');
+            navigate('/chat');
+          } else {
+            console.log('Auth: No session found, redirecting to sign-up...');
+            setAuthStatus('error');
+            setErrorMessage('No authentication session found');
+            setTimeout(() => navigate('/'), 2000);
+          }
+        }
+      } catch (error) {
+        console.error('Auth: Exception during callback processing:', error);
+        setAuthStatus('error');
+        setErrorMessage(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    };
+
+    handleAuthCallback();
+  }, [navigate]);
+
+  // If user is already authenticated (from context), redirect them
+  useEffect(() => {
+    if (!loading && user) {
+      console.log('Auth: User already authenticated, redirecting to chat...');
+      navigate('/chat');
+    }
+  }, [user, loading, navigate]);
+
+  const getStatusMessage = () => {
+    switch (authStatus) {
+      case 'processing':
+        return 'Processing your sign-in...';
+      case 'success':
+        return 'Sign-in successful! Redirecting...';
+      case 'error':
+        return 'Sign-in failed';
+      default:
+        return 'Processing...';
     }
   };
 
-  const handleOnboardingComplete = () => {
-    navigate('/feed');
+  const getStatusColor = () => {
+    switch (authStatus) {
+      case 'processing':
+        return 'text-blue-600';
+      case 'success':
+        return 'text-green-600';
+      case 'error':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
+    }
   };
 
-  if (step === 'onboarding') {
-    return (
-      <div className="min-h-screen bg-gradient-bg flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-soft animate-fade-in">
-          <CardHeader className="text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="bg-gradient-primary p-3 rounded-full">
-                <Sparkles className="h-8 w-8 text-white" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl bg-gradient-primary bg-clip-text text-transparent">
-              Let's get to know you
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="interests">What are your interests?</Label>
-              <Textarea
-                id="interests"
-                placeholder="Mental health, mindfulness, gaming, art..."
-                value={formData.interests}
-                onChange={(e) => setFormData({ ...formData, interests: e.target.value })}
-                className="resize-none"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="goals">What are your wellness goals?</Label>
-              <Textarea
-                id="goals"
-                placeholder="Reduce anxiety, improve sleep, connect with others..."
-                value={formData.goals}
-                onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
-                className="resize-none"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="mood">How are you feeling today?</Label>
-              <Input
-                id="mood"
-                placeholder="Happy, anxious, curious, hopeful..."
-                value={formData.mood}
-                onChange={(e) => setFormData({ ...formData, mood: e.target.value })}
-              />
-            </div>
-
-            <Button 
-              onClick={handleOnboardingComplete}
-              className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
-            >
-              Welcome to Serin!
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-bg flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-soft animate-scale-in">
-        <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="bg-gradient-primary p-4 rounded-full animate-bounce-in">
-              <Heart className="h-10 w-10 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+        {/* Loading spinner */}
+        {authStatus === 'processing' && (
+          <div className="flex justify-center mb-6">
+            <div className="animate-spin h-12 w-12 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+          </div>
+        )}
+        
+        {/* Success icon */}
+        {authStatus === 'success' && (
+          <div className="flex justify-center mb-6">
+            <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+              <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
             </div>
           </div>
-          <CardTitle className="text-3xl bg-gradient-primary bg-clip-text text-transparent">
-            Serin
-          </CardTitle>
-          <p className="text-muted-foreground">Your wellness companion</p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
+        )}
+        
+        {/* Error icon */}
+        {authStatus === 'error' && (
+          <div className="flex justify-center mb-6">
+            <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
+              <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              />
-            </div>
+          </div>
+        )}
 
-            {step === 'signup' && (
-              <div className="space-y-2 animate-fade-in">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  placeholder="Choose a username"
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                />
-              </div>
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">
+          Serin
+        </h1>
+        
+        <p className={`text-lg font-medium mb-4 ${getStatusColor()}`}>
+          {getStatusMessage()}
+        </p>
+        
+        {errorMessage && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <p className="text-red-700 text-sm">{errorMessage}</p>
+            {authStatus === 'error' && (
+              <p className="text-red-600 text-xs mt-2">
+                Redirecting to sign-up page...
+              </p>
             )}
           </div>
+        )}
 
-          <Button 
-            onClick={handleAuth}
-            className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
-          >
-            {step === 'login' ? 'Sign In' : 'Continue'}
-          </Button>
+        {authStatus === 'processing' && (
+          <p className="text-gray-500 text-sm">
+            Please wait while we complete your sign-in...
+          </p>
+        )}
 
-          <div className="text-center">
-            <button
-              onClick={() => setStep(step === 'login' ? 'signup' : 'login')}
-              className="text-primary hover:text-primary-glow transition-colors text-sm"
-            >
-              {step === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+        {authStatus === 'success' && (
+          <p className="text-green-600 text-sm">
+            Taking you to your chat...
+          </p>
+        )}
+      </div>
     </div>
   );
 };
