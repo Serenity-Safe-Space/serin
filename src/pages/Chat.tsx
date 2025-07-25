@@ -13,6 +13,7 @@ import { useConversation } from '@11labs/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { validateNickname } from '@/utils/nicknameGenerator';
 import geminiService from '@/services/geminiService';
+import { logEnvironmentInfo } from '@/utils/environmentDebug';
 
 
 const Chat = () => {
@@ -63,6 +64,9 @@ const Chat = () => {
   // Initialize with Serin's greeting and check service health
   useEffect(() => {
     if (!conversationStarted) {
+      // Log environment info for debugging production issues
+      const envInfo = logEnvironmentInfo('Chat Component Initialization');
+      
       try {
         if (!geminiService) {
           throw new Error('GeminiService not available');
@@ -72,9 +76,10 @@ const Chat = () => {
         console.log('Chat: GeminiService initialized successfully');
       } catch (error) {
         console.error('Chat: Failed to initialize GeminiService:', error);
-        setCurrentDisplayText(
-          "⚠️ Configuration Error: Unable to start AI service. Please check environment variables in Vercel dashboard and refresh the page."
-        );
+        const errorMessage = envInfo.isProduction 
+          ? "⚠️ Service Unavailable: AI chat is currently offline. Please check the browser console for details or try refreshing the page."
+          : "⚠️ Configuration Error: Unable to start AI service. Please check environment variables and refresh the page.";
+        setCurrentDisplayText(errorMessage);
       }
     }
   }, [conversationStarted]);

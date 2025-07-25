@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { logEnvironmentInfo } from '@/utils/environmentDebug';
 
 interface Message {
   role: 'user' | 'model';
@@ -15,22 +16,10 @@ class GeminiService {
   private conversationHistory: ConversationHistory;
 
   constructor() {
-    // Enhanced environment variable debugging
-    console.log('GeminiService: Environment check:', {
-      isDevelopment: import.meta.env.DEV,
-      isProduction: import.meta.env.PROD,
-      mode: import.meta.env.MODE,
-      hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
-      allEnvVars: Object.keys(import.meta.env).filter(key => key.startsWith('VITE_'))
-    });
+    // Enhanced environment debugging
+    const envInfo = logEnvironmentInfo('GeminiService Initialization');
     
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    console.log('GeminiService: API key status:', {
-      present: !!apiKey,
-      length: apiKey ? apiKey.length : 0,
-      startsCorrectly: apiKey ? apiKey.startsWith('AI') : false,
-      firstChars: apiKey ? apiKey.substring(0, 10) + '...' : 'null'
-    });
     
     if (!apiKey) {
       const errorMsg = 'VITE_GEMINI_API_KEY is not configured. Please check Vercel environment variables.';
