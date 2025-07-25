@@ -11,10 +11,6 @@
       "destination": "/lovable-uploads/$1"
     },
     {
-      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|txt))",
-      "destination": "/$1"
-    },
-    {
       "source": "/chat",
       "destination": "/index.html"
     },
