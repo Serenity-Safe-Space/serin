@@ -4,19 +4,58 @@ import { motion } from 'framer-motion';
 import { Mail } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { signInWithGoogle, user, loading } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isProcessingTokens, setIsProcessingTokens] = useState(false);
 
-  // Redirect if user is already authenticated
+  // Check for OAuth tokens in URL hash on component mount
   useEffect(() => {
-    if (user && !loading) {
+    const handleOAuthTokens = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      
+      if (accessToken && refreshToken) {
+        console.log('SignUp: OAuth tokens detected in URL, processing...');
+        setIsProcessingTokens(true);
+        
+        try {
+          // Set the session using the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+
+          if (error) {
+            console.error('SignUp: Error setting session:', error);
+          } else {
+            console.log('SignUp: Session set successfully, tokens processed');
+            // Clear the hash from URL
+            window.history.replaceState(null, '', window.location.pathname);
+            // Don't redirect here - let the user auth state change handle it
+          }
+        } catch (error) {
+          console.error('SignUp: Exception processing tokens:', error);
+        } finally {
+          setIsProcessingTokens(false);
+        }
+      }
+    };
+
+    handleOAuthTokens();
+  }, []);
+
+  // Redirect if user is already authenticated (but not while processing tokens)
+  useEffect(() => {
+    if (user && !loading && !isProcessingTokens) {
       console.log('User authenticated, redirecting to /chat');
       navigate('/chat', { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, isProcessingTokens]);
 
   const handleGoogleSignIn = async () => {
     setIsSigningIn(true);
@@ -47,13 +86,15 @@ const SignUp = () => {
     navigate('/auth');
   };
 
-  // Show loading spinner while checking auth state, but with timeout
-  if (loading) {
-    console.log('SignUp page: Auth loading state');
+  // Show loading spinner while checking auth state or processing tokens
+  if (loading || isProcessingTokens) {
+    console.log('SignUp page: Auth loading state or processing tokens');
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center">
         <div className="text-purple-600 mb-2">Loading...</div>
-        <div className="text-sm text-gray-500">Checking authentication status</div>
+        <div className="text-sm text-gray-500">
+          {isProcessingTokens ? 'Processing sign-in...' : 'Checking authentication status'}
+        </div>
       </div>
     );
   }
