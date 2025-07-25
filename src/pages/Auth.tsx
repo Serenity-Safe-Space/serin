@@ -50,8 +50,8 @@ const Auth = () => {
           // Wait a moment for auth context to update, then redirect
           setTimeout(() => {
             console.log('Auth: Redirecting to chat...');
-            navigate('/chat');
-          }, 1000);
+            navigate('/chat', { replace: true });
+          }, 500);
           
         } else {
           // No tokens in hash - check if user is already authenticated
@@ -69,12 +69,12 @@ const Auth = () => {
           if (session) {
             console.log('Auth: Existing session found, redirecting...');
             setAuthStatus('success');
-            navigate('/chat');
+            navigate('/chat', { replace: true });
           } else {
             console.log('Auth: No session found, redirecting to sign-up...');
             setAuthStatus('error');
             setErrorMessage('No authentication session found');
-            setTimeout(() => navigate('/'), 2000);
+            setTimeout(() => navigate('/', { replace: true }), 2000);
           }
         }
       } catch (error) {
@@ -91,7 +91,7 @@ const Auth = () => {
   useEffect(() => {
     if (!loading && user) {
       console.log('Auth: User already authenticated, redirecting to chat...');
-      navigate('/chat');
+      navigate('/chat', { replace: true });
     }
   }, [user, loading, navigate]);
 

@@ -11,37 +11,44 @@ interface ConversationHistory {
 }
 
 class GeminiService {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+  private genAI: GoogleGenerativeAI | null = null;
+  private model: any = null;
   private conversationHistory: ConversationHistory;
+  private isInitialized: boolean = false;
+  private initializationError: string | null = null;
 
   constructor() {
-    // Enhanced environment debugging
-    const envInfo = logEnvironmentInfo('GeminiService Initialization');
-    
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    
-    if (!apiKey) {
-      const errorMsg = 'VITE_GEMINI_API_KEY is not configured. Please check Vercel environment variables.';
-      console.error('GeminiService:', errorMsg);
-      throw new Error(errorMsg);
-    }
-    
-    if (apiKey.length < 20) {
-      const errorMsg = 'VITE_GEMINI_API_KEY appears to be invalid (too short). Please check the key value.';
-      console.error('GeminiService:', errorMsg);
-      throw new Error(errorMsg);
-    }
-    
+    this.conversationHistory = { messages: [] };
+    this.initialize();
+  }
+
+  private initialize() {
     try {
+      // Enhanced environment debugging
+      const envInfo = logEnvironmentInfo('GeminiService Initialization');
+      
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      
+      if (!apiKey) {
+        this.initializationError = 'VITE_GEMINI_API_KEY is not configured. Please check Vercel environment variables.';
+        console.error('GeminiService:', this.initializationError);
+        console.log('GeminiService: Available environment variables:', Object.keys(import.meta.env));
+        return;
+      }
+      
+      if (apiKey.length < 20) {
+        this.initializationError = 'VITE_GEMINI_API_KEY appears to be invalid (too short). Please check the key value.';
+        console.error('GeminiService:', this.initializationError);
+        return;
+      }
+      
       this.genAI = new GoogleGenerativeAI(apiKey);
-      // Use the correct Gemini 1.5 Flash model (2.5 Flash is not yet available)
       this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      this.conversationHistory = { messages: [] };
+      this.isInitialized = true;
       console.log('GeminiService: Successfully initialized with model gemini-1.5-flash');
     } catch (error) {
+      this.initializationError = `Error during initialization: ${error.message}`;
       console.error('GeminiService: Error during initialization:', error);
-      throw error;
     }
   }
 
@@ -146,6 +153,16 @@ ${currentMessage}`;
   async sendMessage(userMessage: string): Promise<string> {
     console.log('GeminiService.sendMessage: Starting with message:', userMessage);
     
+    // Check if service is properly initialized
+    if (!this.isInitialized || !this.model) {
+      console.error('GeminiService: Service not initialized:', this.initializationError);
+      const language = this.detectLanguage(userMessage);
+      const errorMessage = language === 'fr' 
+        ? "Désolée, je ne peux pas répondre pour le moment. Le service n'est pas configuré correctement. 😔"
+        : "Sorry, I can't respond right now. The service isn't configured properly. 😔";
+      return errorMessage;
+    }
+    
     try {
       // Add user message to history
       this.conversationHistory.messages.push({
@@ -177,10 +194,10 @@ ${currentMessage}`;
       return responseText;
     } catch (error) {
       console.error('GeminiService: Detailed error:', {
-        message: error.message,
-        status: error.status,
-        statusText: error.statusText,
-        stack: error.stack,
+        message: error?.message,
+        status: error?.status,
+        statusText: error?.statusText,
+        stack: error?.stack,
         error: error
       });
       

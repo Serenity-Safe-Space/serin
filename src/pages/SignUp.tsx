@@ -14,7 +14,7 @@ const SignUp = () => {
   useEffect(() => {
     if (user && !loading) {
       console.log('User authenticated, redirecting to /chat');
-      navigate('/chat');
+      navigate('/chat', { replace: true });
     }
   }, [user, loading, navigate]);
 
@@ -61,7 +61,7 @@ const SignUp = () => {
   // If user exists but we're still here, something went wrong with redirect
   if (user) {
     console.log('User exists but redirect failed, forcing navigation');
-    navigate('/chat');
+    navigate('/chat', { replace: true });
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-purple-600">Redirecting...</div>

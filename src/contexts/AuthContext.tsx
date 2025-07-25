@@ -35,6 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [authInitialized, setAuthInitialized] = useState(false)
 
   useEffect(() => {
     // Get initial session
@@ -60,6 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       console.log('AuthContext: Setting loading to false')
       setLoading(false)
+      setAuthInitialized(true)
     }
 
     getInitialSession()
@@ -67,6 +69,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // Only process auth changes after initial load to prevent loops
+        if (!authInitialized) {
+          console.log('AuthContext: Skipping auth change during initialization:', event)
+          return
+        }
+        
         console.log('AuthContext: Auth state changed:', event, session ? 'Session exists' : 'No session')
         
         setSession(session)
@@ -91,7 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [authInitialized])
 
   const fetchUserProfile = async (userId: string) => {
     try {
