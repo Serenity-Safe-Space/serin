@@ -47,10 +47,10 @@ const Auth = () => {
           // Clear the hash from URL
           window.history.replaceState(null, '', window.location.pathname);
           
-          // Wait a moment for auth context to update, then redirect
+          // Wait a moment for auth context to update, then redirect to homepage  
           setTimeout(() => {
-            console.log('Auth: Redirecting to chat...');
-            navigate('/chat', { replace: true });
+            console.log('Auth: Redirecting to homepage...');
+            navigate('/', { replace: true });
           }, 500);
           
         } else {
@@ -67,9 +67,9 @@ const Auth = () => {
           }
 
           if (session) {
-            console.log('Auth: Existing session found, redirecting...');
+            console.log('Auth: Existing session found, redirecting to homepage...');
             setAuthStatus('success');
-            navigate('/chat', { replace: true });
+            navigate('/', { replace: true });
           } else {
             console.log('Auth: No session found, redirecting to sign-up...');
             setAuthStatus('error');
@@ -87,11 +87,11 @@ const Auth = () => {
     handleAuthCallback();
   }, [navigate]);
 
-  // If user is already authenticated (from context), redirect them
+  // If user is already authenticated (from context), redirect them to homepage
   useEffect(() => {
     if (!loading && user) {
-      console.log('Auth: User already authenticated, redirecting to chat...');
-      navigate('/chat', { replace: true });
+      console.log('Auth: User already authenticated, redirecting to homepage...');
+      navigate('/', { replace: true });
     }
   }, [user, loading, navigate]);
 
@@ -180,7 +180,7 @@ const Auth = () => {
 
         {authStatus === 'success' && (
           <p className="text-green-600 text-sm">
-            Taking you to your chat...
+            Taking you to the homepage...
           </p>
         )}
       </div>

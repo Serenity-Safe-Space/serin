@@ -49,13 +49,7 @@ const SignUp = () => {
     handleOAuthTokens();
   }, []);
 
-  // Redirect if user is already authenticated (but not while processing tokens)
-  useEffect(() => {
-    if (user && !loading && !isProcessingTokens) {
-      console.log('User authenticated, redirecting to /chat');
-      navigate('/chat', { replace: true });
-    }
-  }, [user, loading, navigate, isProcessingTokens]);
+  // No automatic redirect - let users stay on homepage after authentication
 
   const handleGoogleSignIn = async () => {
     setIsSigningIn(true);
@@ -99,16 +93,7 @@ const SignUp = () => {
     );
   }
 
-  // If user exists but we're still here, something went wrong with redirect
-  if (user) {
-    console.log('User exists but redirect failed, forcing navigation');
-    navigate('/chat', { replace: true });
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-purple-600">Redirecting...</div>
-      </div>
-    );
-  }
+  // Show authenticated homepage content for signed-in users
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-8">
@@ -126,81 +111,118 @@ const SignUp = () => {
           transition={{ delay: 0.2 }}
         >
           <h1 className="text-4xl font-bold text-purple-800 leading-tight">
-            Sign up to<br />
-            get started
+            {user ? 'Welcome to Serin' : 'Sign up to get started'}
           </h1>
+          {user && (
+            <p className="text-gray-600 text-lg">
+              You're all set! Ready to start chatting?
+            </p>
+          )}
         </motion.div>
 
-        {/* Sign-up Buttons */}
+        {/* Conditional Content Based on Auth State */}
         <motion.div
           className="space-y-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          {/* Google Sign Up */}
-          <Button
-            onClick={handleGoogleSignIn}
-            disabled={isSigningIn}
-            variant="outline"
-            className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors disabled:opacity-50"
-          >
-            <div className="flex items-center justify-start w-full">
-              <div className="w-5 h-5 mr-4">
-                {/* Google Icon placeholder - using a colored G for now */}
-                <div className="w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 flex items-center justify-center text-white text-xs font-bold">
-                  G
+          {user ? (
+            // Authenticated User Content
+            <>
+              <Button
+                onClick={() => navigate('/chat')}
+                className="w-full py-4 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-base font-medium transition-colors"
+              >
+                Start Chatting with Serin
+              </Button>
+              
+              <Button
+                onClick={() => navigate('/profile')}
+                variant="outline"
+                className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors"
+              >
+                View Profile
+              </Button>
+            </>
+          ) : (
+            // Non-authenticated User Content
+            <>
+              {/* Google Sign Up */}
+              <Button
+                onClick={handleGoogleSignIn}
+                disabled={isSigningIn}
+                variant="outline"
+                className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors disabled:opacity-50"
+              >
+                <div className="flex items-center justify-start w-full">
+                  <div className="w-5 h-5 mr-4">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 flex items-center justify-center text-white text-xs font-bold">
+                      G
+                    </div>
+                  </div>
+                  <span>{isSigningIn ? 'Signing in...' : 'Sign up with Google'}</span>
                 </div>
-              </div>
-              <span>{isSigningIn ? 'Signing in...' : 'Sign up with Google'}</span>
-            </div>
-          </Button>
+              </Button>
 
-          {/* Apple Sign Up */}
-          <Button
-            onClick={handleAppleSignIn}
-            variant="outline"
-            className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors opacity-50 cursor-not-allowed"
-            disabled
-          >
-            <div className="flex items-center justify-start w-full">
-              <div className="w-5 h-5 mr-4">
-                {/* Apple Icon placeholder - using a black apple shape */}
-                <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold">
-                  🍎
+              {/* Apple Sign Up */}
+              <Button
+                onClick={handleAppleSignIn}
+                variant="outline"
+                className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors opacity-50 cursor-not-allowed"
+                disabled
+              >
+                <div className="flex items-center justify-start w-full">
+                  <div className="w-5 h-5 mr-4">
+                    <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      🍎
+                    </div>
+                  </div>
+                  <span>Sign up with Apple (Coming Soon)</span>
                 </div>
-              </div>
-              <span>Sign up with Apple (Coming Soon)</span>
-            </div>
-          </Button>
+              </Button>
 
-          {/* Email Sign Up */}
-          <Button
-            onClick={handleEmailSignUp}
-            variant="outline"
-            className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors opacity-50 cursor-not-allowed"
-            disabled
-          >
-            <div className="flex items-center justify-start w-full">
-              <Mail className="w-5 h-5 mr-4 text-gray-600" />
-              <span>Sign up with Email (Coming Soon)</span>
-            </div>
-          </Button>
+              {/* Email Sign Up */}
+              <Button
+                onClick={handleEmailSignUp}
+                variant="outline"
+                className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors opacity-50 cursor-not-allowed"
+                disabled
+              >
+                <div className="flex items-center justify-start w-full">
+                  <Mail className="w-5 h-5 mr-4 text-gray-600" />
+                  <span>Sign up with Email (Coming Soon)</span>
+                </div>
+              </Button>
+            </>
+          )}
         </motion.div>
 
-        {/* Existing Account Link */}
+        {/* Footer Link */}
         <motion.div
           className="text-center pt-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          <button
-            onClick={handleExistingAccount}
-            className="text-gray-700 text-base hover:text-gray-900 transition-colors"
-          >
-            I already have an account
-          </button>
+          {user ? (
+            <button
+              onClick={() => {
+                // Handle sign out logic here if needed
+                navigate('/profile');
+              }}
+              className="text-gray-700 text-base hover:text-gray-900 transition-colors"
+            >
+              Manage Account
+            </button>
+          ) : (
+            <button
+              onClick={handleExistingAccount}
+              className="text-gray-700 text-base hover:text-gray-900 transition-colors"
+            >
+              I already have an account
+            </button>
+          )}
         </motion.div>
       </motion.div>
     </div>
