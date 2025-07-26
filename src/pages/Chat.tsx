@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { validateNickname } from '@/utils/nicknameGenerator';
 import geminiService from '@/services/geminiService';
 import { logEnvironmentInfo } from '@/utils/environmentDebug';
+import { supabase } from '@/lib/supabase';
 
 
 const Chat = () => {
@@ -47,6 +48,40 @@ const Chat = () => {
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [editedNickname, setEditedNickname] = useState('');
   const [isResendingEmail, setIsResendingEmail] = useState(false);
+
+  // FALLBACK: Handle OAuth tokens if they end up on this page by mistake
+  useEffect(() => {
+    const handleMisdirectedOAuthTokens = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      
+      if (accessToken && refreshToken) {
+        console.log('Chat: FALLBACK - OAuth tokens detected on /chat page, processing and redirecting...');
+        
+        try {
+          // Process tokens
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+
+          if (error) {
+            console.error('Chat: FALLBACK - Error setting session:', error);
+          } else {
+            console.log('Chat: FALLBACK - Session set successfully, redirecting to homepage');
+            // Clear the hash and redirect to homepage
+            window.history.replaceState(null, '', '/');
+            navigate('/', { replace: true });
+          }
+        } catch (error) {
+          console.error('Chat: FALLBACK - Exception processing tokens:', error);
+        }
+      }
+    };
+
+    handleMisdirectedOAuthTokens();
+  }, [navigate]);
 
   // Voice conversation with ElevenLabs
   const conversation = useConversation({

@@ -15,12 +15,14 @@ const SignUp = () => {
   // Check for OAuth tokens in URL hash on component mount
   useEffect(() => {
     const handleOAuthTokens = async () => {
+      console.log('SignUp: Checking for OAuth tokens on mount. Current URL:', window.location.href);
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
       
       if (accessToken && refreshToken) {
-        console.log('SignUp: OAuth tokens detected in URL, processing...');
+        console.log('SignUp: ✅ OAuth tokens detected in URL hash, processing...');
+        console.log('SignUp: Current page:', window.location.pathname);
         setIsProcessingTokens(true);
         
         try {
