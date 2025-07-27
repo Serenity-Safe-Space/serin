@@ -7,10 +7,20 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 const SignUp = () => {
+  console.log('SignUp: Component rendering/re-rendering');
+  
   const navigate = useNavigate();
   const { signInWithGoogle, user, loading } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isProcessingTokens, setIsProcessingTokens] = useState(false);
+  
+  console.log('SignUp: Current state:', { 
+    user: !!user, 
+    loading, 
+    isSigningIn, 
+    isProcessingTokens,
+    userId: user?.id 
+  });
 
   // Check for OAuth tokens in URL hash on component mount
   useEffect(() => {
@@ -51,7 +61,26 @@ const SignUp = () => {
     handleOAuthTokens();
   }, []);
 
-  // No automatic redirect - let users stay on homepage after authentication
+  // Automatic redirect to chat when user is authenticated and not processing tokens
+  useEffect(() => {
+    console.log('SignUp.useEffect: Checking for auto-redirect...', {
+      user: !!user,
+      loading,
+      isProcessingTokens,
+      isSigningIn
+    });
+    
+    if (user && !loading && !isProcessingTokens && !isSigningIn) {
+      console.log('SignUp.useEffect: User authenticated, attempting auto-redirect to /chat');
+      // Small delay to ensure auth state is fully settled
+      const timer = setTimeout(() => {
+        console.log('SignUp.useEffect: Executing navigation to /chat');
+        navigate('/chat', { replace: true });
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user, loading, isProcessingTokens, isSigningIn, navigate]);
 
   const handleGoogleSignIn = async () => {
     setIsSigningIn(true);

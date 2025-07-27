@@ -142,6 +142,14 @@ const Chat = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Debug: Track component mount/unmount
+  useEffect(() => {
+    console.log('Chat: Component mounted successfully');
+    return () => {
+      console.log('Chat: Component unmounting');
+    };
+  }, []);
+
   // Debug: Track state changes
   useEffect(() => {
     console.log('Chat.useEffect: showChatInterface changed to:', showChatInterface);
