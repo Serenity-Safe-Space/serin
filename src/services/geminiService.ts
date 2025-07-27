@@ -12,12 +12,13 @@ interface ConversationHistory {
 
 class GeminiService {
   private genAI: GoogleGenerativeAI | null = null;
-  private model: any = null;
+  private model: unknown = null;
   private conversationHistory: ConversationHistory;
   private isInitialized: boolean = false;
   private initializationError: string | null = null;
 
   constructor() {
+    console.log('GeminiService: Constructor called');
     this.conversationHistory = { messages: [] };
     this.initialize();
   }
@@ -177,7 +178,7 @@ ${currentMessage}`;
 
       // Generate response
       console.log('GeminiService: Calling Gemini API...');
-      const result = await this.model.generateContent(prompt);
+      const result = await (this.model as any).generateContent(prompt);
       console.log('GeminiService: Received result from API');
       
       const response = await result.response;

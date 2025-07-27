@@ -18,6 +18,8 @@ import { supabase } from '@/lib/supabase';
 
 
 const Chat = () => {
+  console.log('Chat: Component rendering/re-rendering');
+  
   const {
     appState,
     enableFeature,
@@ -98,6 +100,7 @@ const Chat = () => {
 
   // Initialize with Serin's greeting and check service health
   useEffect(() => {
+    console.log('Chat.useEffect: Initializing with conversationStarted:', conversationStarted);
     if (!conversationStarted) {
       // Log environment info for debugging production issues
       const envInfo = logEnvironmentInfo('Chat Component Initialization');
@@ -106,15 +109,17 @@ const Chat = () => {
         if (!geminiService) {
           throw new Error('GeminiService not available');
         }
+        console.log('Chat: GeminiService is available, getting initial message');
         const initialMessage = geminiService.getInitialMessage();
         setCurrentDisplayText(initialMessage);
-        console.log('Chat: GeminiService initialized successfully');
+        console.log('Chat: GeminiService initialized successfully, initial message:', initialMessage);
       } catch (error) {
         console.error('Chat: Failed to initialize GeminiService:', error);
         const errorMessage = envInfo.isProduction 
           ? "⚠️ Service Unavailable: AI chat is currently offline. Please check the browser console for details or try refreshing the page."
           : "⚠️ Configuration Error: Unable to start AI service. Please check environment variables and refresh the page.";
         setCurrentDisplayText(errorMessage);
+        console.log('Chat: Set error message as current display text');
       }
     }
   }, [conversationStarted]);
@@ -136,6 +141,19 @@ const Chat = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Debug: Track state changes
+  useEffect(() => {
+    console.log('Chat.useEffect: showChatInterface changed to:', showChatInterface);
+  }, [showChatInterface]);
+
+  useEffect(() => {
+    console.log('Chat.useEffect: showOnboarding changed to:', showOnboarding);
+  }, [showOnboarding]);
+
+  useEffect(() => {
+    console.log('Chat.useEffect: newMessage changed to:', newMessage);
+  }, [newMessage]);
 
   const sendMessage = async () => {
     console.log('Chat.sendMessage: Starting with:', { 
@@ -204,7 +222,7 @@ const Chat = () => {
 
 
   const handleAcceptRecommendation = (id: string, type: string) => {
-    enableFeature(type as any);
+    enableFeature(type as 'feed' | 'communities' | 'profile');
     removeRecommendation(id);
     navigate(`/${type}`);
   };
@@ -237,17 +255,29 @@ const Chat = () => {
   };
 
   const handleChoiceClick = (choice: string) => {
+    console.log('Chat.handleChoiceClick: Choice selected:', choice);
+    console.log('Chat.handleChoiceClick: Current state before update:', {
+      showOnboarding,
+      showChatInterface,
+      showPeerMatching,
+      selectedChoice
+    });
+    
     setSelectedChoice(choice);
     setShowOnboarding(false);
 
-    if (choice === "I want to connect with peers") {
+    if (choice === "Talk to someone like me") {
+      console.log('Chat.handleChoiceClick: Showing peer matching interface');
       setShowPeerMatching(true);
     } else {
+      console.log('Chat.handleChoiceClick: Showing chat interface and pre-filling message');
       setShowChatInterface(true);
       // Pre-fill the message based on choice
       setNewMessage(choice);
       setIsUserTurn(true);
     }
+    
+    console.log('Chat.handleChoiceClick: State update commands sent');
   };
 
   const handleBeginChat = () => {
@@ -565,13 +595,25 @@ const Chat = () => {
               <div className="flex items-center space-x-3 bg-white rounded-full p-4 shadow-md border border-gray-100">
                 <Input
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                  onChange={(e) => {
+                    console.log('Chat.Input.onChange: New value:', e.target.value);
+                    setNewMessage(e.target.value);
+                  }}
+                  onKeyDown={(e) => {
+                    console.log('Chat.Input.onKeyDown: Key pressed:', e.key);
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      console.log('Chat.Input.onKeyDown: Enter pressed, calling sendMessage');
+                      sendMessage();
+                    }
+                  }}
                   placeholder="Say anything... I'm listening"
                   className="flex-1 border-none bg-transparent text-gray-700 placeholder-gray-400 focus:ring-0 text-base"
                 />
                 <Button
-                  onClick={sendMessage}
+                  onClick={() => {
+                    console.log('Chat.Button.onClick: Send button clicked');
+                    sendMessage();
+                  }}
                   size="sm"
                   className="w-10 h-10 rounded-full bg-purple-500 hover:bg-purple-600 text-white p-0 shrink-0"
                   disabled={!isUserTurn || !newMessage.trim() || isGeneratingResponse}
