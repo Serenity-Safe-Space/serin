@@ -235,9 +235,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Log environment info for debugging
       const env = logEnvironmentInfo('OAuth Sign-In')
       
-      // Use environment-aware base URL for redirect
-      const redirectURL = getBaseURL() + '/'
-      console.log('AuthContext: OAuth redirect URL (environment-aware):', redirectURL)
+      // Use environment-aware base URL for redirect with cache-busting
+      const timestamp = Date.now()
+      const redirectURL = getBaseURL() + '/?oauth_callback=true&t=' + timestamp
+      console.log('AuthContext: OAuth redirect URL (environment-aware + cache-busting):', redirectURL)
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

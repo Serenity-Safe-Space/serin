@@ -18,12 +18,18 @@ import EmailConfirmation from "./pages/EmailConfirmation";
 import NotFound from "./pages/NotFound";
 import "@/utils/deploymentCheck"; // Auto-run deployment checks
 import { addDeploymentHeaders, logDeploymentInfo } from "@/utils/deploymentDebug";
+import { handleOAuthCacheIssues } from "@/utils/cacheManager";
 
 const queryClient = new QueryClient();
 
 // Initialize deployment debugging
 addDeploymentHeaders();
 logDeploymentInfo('App Initialization');
+
+// Handle OAuth callback cache issues
+handleOAuthCacheIssues().catch(error => {
+  console.error('App: Error handling OAuth cache issues:', error);
+});
 
 const App = () => (
   <ErrorBoundary>
