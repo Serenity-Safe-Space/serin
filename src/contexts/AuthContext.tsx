@@ -3,6 +3,7 @@ import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase, UserProfile } from '@/lib/supabase'
 import { generateNickname } from '@/utils/nicknameGenerator'
 import { sendWelcomeEmail } from '@/utils/emailService'
+import { getBaseURL, logEnvironmentInfo } from '@/utils/environment'
 
 interface AuthContextType {
   user: User | null
@@ -230,9 +231,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signInWithGoogle = async () => {
     try {
       console.log('AuthContext: Starting Google OAuth sign-in...')
-      // Force absolute homepage URL regardless of current page
-      const redirectURL = 'https://serin-soul-spark.vercel.app/'
-      console.log('AuthContext: OAuth redirect URL (forced absolute homepage):', redirectURL)
+      
+      // Log environment info for debugging
+      const env = logEnvironmentInfo('OAuth Sign-In')
+      
+      // Use environment-aware base URL for redirect
+      const redirectURL = getBaseURL() + '/'
+      console.log('AuthContext: OAuth redirect URL (environment-aware):', redirectURL)
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
