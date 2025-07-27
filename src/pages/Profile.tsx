@@ -3,9 +3,31 @@ import { Settings, User, HelpCircle } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import AvatarGlowSection from '@/components/profile/AvatarGlowSection';
 import WeeklyLeaderboard from '@/components/profile/WeeklyLeaderboard';
+import { useAuth } from '@/contexts/AuthContext';
+import SignUp from './SignUp';
 
 const Profile = () => {
+  const { user, loading } = useAuth();
 
+  console.log('Profile: Component rendering, user:', !!user, 'loading:', loading);
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-purple-600">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show login screen if not authenticated
+  if (!user) {
+    console.log('Profile: No user found, showing SignUp component');
+    return <SignUp />;
+  }
+
+  // Show actual profile if authenticated
+  console.log('Profile: User authenticated, showing profile interface');
   return (
     <div className="min-h-screen bg-gradient-bg pb-28">
       <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">

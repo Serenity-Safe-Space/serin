@@ -8,11 +8,12 @@ import OfflineEncouragement from "@/components/OfflineEncouragement";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import HomePage from "./pages/HomePage";
 import SignUp from "./pages/SignUp";
 import Auth from "./pages/Auth";
 import Feed from "./pages/Feed";
 import Communities from "./pages/Communities";
-import Chat from "./pages/Chat";
+import SimplifiedChat from "./pages/SimplifiedChat";
 import Profile from "./pages/Profile";
 import EmailConfirmation from "./pages/EmailConfirmation";
 import NotFound from "./pages/NotFound";
@@ -42,17 +43,16 @@ const App = () => (
             <OfflineEncouragement />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<SignUp />} />
+                <Route path="/" element={<HomePage />} />
+                <Route path="/signup" element={<SignUp />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/confirm-email" element={<EmailConfirmation />} />
                 <Route 
                   path="/chat" 
                   element={
-                    <ProtectedRoute>
-                      <ErrorBoundary>
-                        <Chat />
-                      </ErrorBoundary>
-                    </ProtectedRoute>
+                    <ErrorBoundary>
+                      <SimplifiedChat />
+                    </ErrorBoundary>
                   } 
                 />
                 <Route 
@@ -78,11 +78,9 @@ const App = () => (
                 <Route 
                   path="/profile" 
                   element={
-                    <ProtectedRoute>
-                      <ErrorBoundary>
-                        <Profile />
-                      </ErrorBoundary>
-                    </ProtectedRoute>
+                    <ErrorBoundary>
+                      <Profile />
+                    </ErrorBoundary>
                   } 
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
