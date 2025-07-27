@@ -9,7 +9,7 @@ const HomePage = () => {
   console.log('HomePage: Component rendering/re-rendering');
   
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [welcomeTextVariant, setWelcomeTextVariant] = useState(0);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -105,6 +105,16 @@ const HomePage = () => {
                   <span className="text-2xl font-medium">
                     Let's make life feel better, together.
                   </span>
+                  {user && (
+                    <div className="mt-4">
+                      <button 
+                        onClick={() => signOut()} 
+                        className="text-sm text-gray-500 underline"
+                      >
+                        (Debug: Sign Out)
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -112,6 +122,16 @@ const HomePage = () => {
                   <span className="text-2xl font-medium">
                     Let's make life feel better, together.
                   </span>
+                  {user && (
+                    <div className="mt-4">
+                      <button 
+                        onClick={() => signOut()} 
+                        className="text-sm text-gray-500 underline"
+                      >
+                        (Debug: Sign Out)
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </motion.h1>

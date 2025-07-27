@@ -61,26 +61,7 @@ const SignUp = () => {
     handleOAuthTokens();
   }, []);
 
-  // Automatic redirect to chat when user is authenticated and not processing tokens
-  useEffect(() => {
-    console.log('SignUp.useEffect: Checking for auto-redirect...', {
-      user: !!user,
-      loading,
-      isProcessingTokens,
-      isSigningIn
-    });
-    
-    if (user && !loading && !isProcessingTokens && !isSigningIn) {
-      console.log('SignUp.useEffect: User authenticated, attempting auto-redirect to /chat');
-      // Small delay to ensure auth state is fully settled
-      const timer = setTimeout(() => {
-        console.log('SignUp.useEffect: Executing navigation to /chat');
-        navigate('/chat', { replace: true });
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [user, loading, isProcessingTokens, isSigningIn, navigate]);
+  // No automatic redirects - let users navigate manually
 
   const handleGoogleSignIn = async () => {
     setIsSigningIn(true);
