@@ -13,7 +13,7 @@ import SignUp from "./pages/SignUp";
 import Auth from "./pages/Auth";
 import Feed from "./pages/Feed";
 import Communities from "./pages/Communities";
-import SimplifiedChat from "./pages/SimplifiedChat";
+import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import EmailConfirmation from "./pages/EmailConfirmation";
 import NotFound from "./pages/NotFound";
@@ -51,7 +51,7 @@ const App = () => (
                   path="/chat" 
                   element={
                     <ErrorBoundary>
-                      <SimplifiedChat />
+                      <Chat />
                     </ErrorBoundary>
                   } 
                 />

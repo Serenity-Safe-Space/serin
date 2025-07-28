@@ -26,14 +26,14 @@ const HomePage = () => {
     console.log('HomePage.handleChoiceClick: Choice selected:', choice);
     
     if (choice === "I'm not doing great") {
-      console.log('HomePage: Navigating to /chat');
+      console.log('HomePage: User chose chat option, navigating to /chat');
       navigate('/chat');
     } else if (choice === "Talk to someone like me") {
       console.log('HomePage: Peer matching not implemented yet');
-      // Future: navigate to peer matching
+      // Future: navigate to peer matching or communities
     } else {
-      console.log('HomePage: Other choice, navigating to /chat');
-      navigate('/chat');
+      console.log('HomePage: Other choice selected, staying on homepage');
+      // Keep user on homepage for other choices instead of auto-navigating
     }
   };
 
