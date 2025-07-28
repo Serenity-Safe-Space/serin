@@ -27,9 +27,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // If user is not authenticated, redirect to sign-up page
   if (!user) {
-    console.log('ProtectedRoute: No user found, redirecting to / from', location.pathname);
+    console.log('ProtectedRoute: No user found, redirecting to /signup from', location.pathname);
     // Save the attempted location for redirecting after login
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/signup" state={{ from: location }} replace />;
   }
 
   // User is authenticated, render the protected component

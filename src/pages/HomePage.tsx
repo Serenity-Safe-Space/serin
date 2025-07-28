@@ -9,9 +9,17 @@ const HomePage = () => {
   console.log('HomePage: Component rendering/re-rendering');
   
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const [welcomeTextVariant, setWelcomeTextVariant] = useState(0);
   const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Redirect non-authenticated users to signup page
+  useEffect(() => {
+    if (!loading && !user) {
+      console.log('HomePage: No user found, redirecting to signup...');
+      navigate('/signup', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   // Randomly switch welcome text variant
   useEffect(() => {
@@ -36,6 +44,16 @@ const HomePage = () => {
       // Keep user on homepage for other choices instead of auto-navigating
     }
   };
+
+  // Show loading spinner while checking auth state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <div className="text-purple-600 mb-2">Loading...</div>
+        <div className="text-sm text-gray-500">Checking authentication status</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

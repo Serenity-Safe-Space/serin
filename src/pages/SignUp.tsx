@@ -61,7 +61,13 @@ const SignUp = () => {
     handleOAuthTokens();
   }, []);
 
-  // No automatic redirects - let users navigate manually
+  // Redirect authenticated users to homepage
+  useEffect(() => {
+    if (!loading && user) {
+      console.log('SignUp: User already authenticated, redirecting to homepage...');
+      navigate('/', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleGoogleSignIn = async () => {
     setIsSigningIn(true);
@@ -123,91 +129,63 @@ const SignUp = () => {
           transition={{ delay: 0.2 }}
         >
           <h1 className="text-4xl font-bold text-purple-800 leading-tight">
-            {user ? 'Welcome to Serin' : 'Sign up to get started'}
+            Sign up to get started
           </h1>
-          {user && (
-            <p className="text-gray-600 text-lg">
-              You're all set! Ready to start chatting?
-            </p>
-          )}
         </motion.div>
 
-        {/* Conditional Content Based on Auth State */}
+        {/* Sign Up Options */}
         <motion.div
           className="space-y-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          {user ? (
-            // Authenticated User Content
-            <>
-              <Button
-                onClick={() => navigate('/chat')}
-                className="w-full py-4 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-base font-medium transition-colors"
-              >
-                Start Chatting with Serin
-              </Button>
-              
-              <Button
-                onClick={() => navigate('/profile')}
-                variant="outline"
-                className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors"
-              >
-                View Profile
-              </Button>
-            </>
-          ) : (
-            // Non-authenticated User Content
-            <>
-              {/* Google Sign Up */}
-              <Button
-                onClick={handleGoogleSignIn}
-                disabled={isSigningIn}
-                variant="outline"
-                className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors disabled:opacity-50"
-              >
-                <div className="flex items-center justify-start w-full">
-                  <div className="w-5 h-5 mr-4">
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 flex items-center justify-center text-white text-xs font-bold">
-                      G
-                    </div>
-                  </div>
-                  <span>{isSigningIn ? 'Signing in...' : 'Sign up with Google'}</span>
+          {/* Google Sign Up */}
+          <Button
+            onClick={handleGoogleSignIn}
+            disabled={isSigningIn}
+            variant="outline"
+            className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors disabled:opacity-50"
+          >
+            <div className="flex items-center justify-start w-full">
+              <div className="w-5 h-5 mr-4">
+                <div className="w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 flex items-center justify-center text-white text-xs font-bold">
+                  G
                 </div>
-              </Button>
+              </div>
+              <span>{isSigningIn ? 'Signing in...' : 'Sign up with Google'}</span>
+            </div>
+          </Button>
 
-              {/* Apple Sign Up */}
-              <Button
-                onClick={handleAppleSignIn}
-                variant="outline"
-                className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors opacity-50 cursor-not-allowed"
-                disabled
-              >
-                <div className="flex items-center justify-start w-full">
-                  <div className="w-5 h-5 mr-4">
-                    <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold">
-                      🍎
-                    </div>
-                  </div>
-                  <span>Sign up with Apple (Coming Soon)</span>
+          {/* Apple Sign Up */}
+          <Button
+            onClick={handleAppleSignIn}
+            variant="outline"
+            className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors opacity-50 cursor-not-allowed"
+            disabled
+          >
+            <div className="flex items-center justify-start w-full">
+              <div className="w-5 h-5 mr-4">
+                <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  🍎
                 </div>
-              </Button>
+              </div>
+              <span>Sign up with Apple (Coming Soon)</span>
+            </div>
+          </Button>
 
-              {/* Email Sign Up */}
-              <Button
-                onClick={handleEmailSignUp}
-                variant="outline"
-                className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors opacity-50 cursor-not-allowed"
-                disabled
-              >
-                <div className="flex items-center justify-start w-full">
-                  <Mail className="w-5 h-5 mr-4 text-gray-600" />
-                  <span>Sign up with Email (Coming Soon)</span>
-                </div>
-              </Button>
-            </>
-          )}
+          {/* Email Sign Up */}
+          <Button
+            onClick={handleEmailSignUp}
+            variant="outline"
+            className="w-full py-4 px-6 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full text-base font-medium transition-colors opacity-50 cursor-not-allowed"
+            disabled
+          >
+            <div className="flex items-center justify-start w-full">
+              <Mail className="w-5 h-5 mr-4 text-gray-600" />
+              <span>Sign up with Email (Coming Soon)</span>
+            </div>
+          </Button>
         </motion.div>
 
         {/* Footer Link */}
@@ -217,24 +195,12 @@ const SignUp = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          {user ? (
-            <button
-              onClick={() => {
-                // Handle sign out logic here if needed
-                navigate('/profile');
-              }}
-              className="text-gray-700 text-base hover:text-gray-900 transition-colors"
-            >
-              Manage Account
-            </button>
-          ) : (
-            <button
-              onClick={handleExistingAccount}
-              className="text-gray-700 text-base hover:text-gray-900 transition-colors"
-            >
-              I already have an account
-            </button>
-          )}
+          <button
+            onClick={handleExistingAccount}
+            className="text-gray-700 text-base hover:text-gray-900 transition-colors"
+          >
+            I already have an account
+          </button>
         </motion.div>
       </motion.div>
     </div>
